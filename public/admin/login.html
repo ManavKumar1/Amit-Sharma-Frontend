@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner Login — Maya Ellison</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+<div class="login-shell">
+  <div class="login-card">
+    <span class="brand">Maya Ellison</span>
+    <span class="sub">Owner Dashboard</span>
+
+    <p class="login-error" id="loginError"></p>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="loginSubmit">Log In</button>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  const form = document.getElementById('loginForm');
+  const errorEl = document.getElementById('loginError');
+  const submitBtn = document.getElementById('loginSubmit');
+
+  // Already logged in? Skip straight to the dashboard.
+  fetch('/api/auth/me', { credentials: 'include' })
+    .then((r) => { if (r.ok) window.location.href = 'dashboard.html'; })
+    .catch(() => {});
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.classList.remove('is-visible');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Logging in…';
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed.');
+      }
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.classList.add('is-visible');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Log In';
+    }
+  });
+})();
+</script>
+</body>
+</html>

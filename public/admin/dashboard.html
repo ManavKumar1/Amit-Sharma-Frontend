@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Maya Ellison</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+<div class="mobile-topbar">
+  <button id="sidebarToggle" aria-label="Open menu">&#9776;</button>
+  <span class="brand" style="font-size:1.1rem;">Maya Ellison</span>
+  <span style="width:1.4rem;"></span>
+</div>
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<div class="admin-shell">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <span class="brand">Maya Ellison</span>
+    <nav class="admin-nav" id="adminNav">
+      <a href="#overview" data-section="overview">Overview</a>
+      <a href="#bookings" data-section="bookings">Bookings <span class="badge-count" id="countBookings" hidden>0</span></a>
+      <a href="#inquiries" data-section="inquiries">Inquiries <span class="badge-count" id="countInquiries" hidden>0</span></a>
+      <a href="#services" data-section="services">Services</a>
+      <a href="#portfolio" data-section="portfolio">Portfolio</a>
+      <a href="#testimonials" data-section="testimonials">Testimonials</a>
+      <a href="#availability" data-section="availability">Availability</a>
+      <a href="#settings" data-section="settings">Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="logoutBtn">Log Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- ============ OVERVIEW ============ -->
+    <section class="dash-section" id="section-overview">
+      <div class="admin-topbar">
+        <div>
+          <h1>Overview</h1>
+          <p class="sub">What needs your attention today.</p>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="overviewStats">
+        <div class="stat-card"><div class="skeleton-row"></div></div>
+        <div class="stat-card"><div class="skeleton-row"></div></div>
+        <div class="stat-card"><div class="skeleton-row"></div></div>
+        <div class="stat-card"><div class="skeleton-row"></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Upcoming appointments</h2>
+          <a href="#bookings" class="btn btn-outline-dark" style="padding:0.6em 1.2em;font-size:0.75rem;">View all bookings</a>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="upcomingTable">
+            <thead><tr><th>Customer</th><th>Service</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+            <tbody><tr><td colspan="5"><div class="skeleton-row"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BOOKINGS ============ -->
+    <section class="dash-section" id="section-bookings" hidden>
+      <div class="admin-topbar">
+        <div>
+          <h1>Bookings</h1>
+          <p class="sub">Confirmed and pending appointments.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="chip-row" id="bookingFilterChips">
+            <button class="chip is-active" data-status="">All</button>
+            <button class="chip" data-status="pending">Pending</button>
+            <button class="chip" data-status="confirmed">Confirmed</button>
+            <button class="chip" data-status="completed">Completed</button>
+            <button class="chip" data-status="cancelled">Cancelled</button>
+            <button class="chip" data-status="no-show">No-show</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="bookingsTable">
+            <thead><tr><th>Customer</th><th>Service</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+            <tbody><tr><td colspan="5"><div class="skeleton-row"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INQUIRIES ============ -->
+    <section class="dash-section" id="section-inquiries" hidden>
+      <div class="admin-topbar">
+        <div>
+          <h1>Inquiries</h1>
+          <p class="sub">Requests submitted from the website booking form.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="chip-row" id="inquiryFilterChips">
+            <button class="chip is-active" data-status="">All</button>
+            <button class="chip" data-status="new">New</button>
+            <button class="chip" data-status="contacted">Contacted</button>
+            <button class="chip" data-status="converted">Converted</button>
+            <button class="chip" data-status="rejected">Rejected</button>
+            <button class="chip" data-status="archived">Archived</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="inquiriesTable">
+            <thead><tr><th>Customer</th><th>Service</th><th>Date</th><th>Time</th><th>Phone</th><th>Status</th></tr></thead>
+            <tbody><tr><td colspan="6"><div class="skeleton-row"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PLACEHOLDER SECTIONS ============ -->
+    <section class="dash-section" id="section-services" hidden>
+      <div class="admin-topbar"><h1>Services</h1></div>
+      <div class="coming-soon">
+        <h3>Services management — next pass</h3>
+        <p>Add, edit, reorder, and price your services here. The public site already reads live service data once this section is built.</p>
+      </div>
+    </section>
+    <section class="dash-section" id="section-portfolio" hidden>
+      <div class="admin-topbar"><h1>Portfolio</h1></div>
+      <div class="coming-soon">
+        <h3>Portfolio management — next pass</h3>
+        <p>Upload and organize gallery images (Cloudinary) here.</p>
+      </div>
+    </section>
+    <section class="dash-section" id="section-testimonials" hidden>
+      <div class="admin-topbar"><h1>Testimonials</h1></div>
+      <div class="coming-soon">
+        <h3>Testimonial management — next pass</h3>
+        <p>Add, edit, and reorder client reviews here.</p>
+      </div>
+    </section>
+    <section class="dash-section" id="section-availability" hidden>
+      <div class="admin-topbar"><h1>Availability</h1></div>
+      <div class="coming-soon">
+        <h3>Availability &amp; blocked dates — next pass</h3>
+        <p>Set weekly hours and block off vacation days here. The API is already live at <code>/api/availability</code> and <code>/api/blocked-dates</code>.</p>
+      </div>
+    </section>
+    <section class="dash-section" id="section-settings" hidden>
+      <div class="admin-topbar"><h1>Settings</h1></div>
+      <div class="coming-soon">
+        <h3>Business settings — next pass</h3>
+        <p>Edit your name, bio, contact info, and hours here. The API is already live at <code>/api/profile</code>.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ DETAIL MODAL (shared by Bookings & Inquiries) ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-panel" id="modalPanel"></div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="../js/admin.js"></script>
+</body>
+</html>
