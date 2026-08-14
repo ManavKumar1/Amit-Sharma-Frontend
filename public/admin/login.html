@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Owner Login — Amit Sharma</title>
+<title>Owner Login — Maya Ellison</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/admin.css">
@@ -12,10 +12,11 @@
 
 <div class="login-shell">
   <div class="login-card">
-    <span class="brand">Amit Sharma</span>
+    <span class="brand">Maya Ellison</span>
     <span class="sub">Owner Dashboard</span>
 
     <p class="login-error" id="loginError"></p>
+    <p class="login-error" id="setupNotice" style="border-color:var(--brass);color:var(--espresso-text);background:rgba(176,141,87,0.12);"></p>
 
     <form id="loginForm" novalidate>
       <div class="form-group">
@@ -35,11 +36,25 @@
 (function () {
   const form = document.getElementById('loginForm');
   const errorEl = document.getElementById('loginError');
+  const setupNotice = document.getElementById('setupNotice');
   const submitBtn = document.getElementById('loginSubmit');
 
   // Already logged in? Skip straight to the dashboard.
   fetch('/api/auth/me', { credentials: 'include' })
     .then((r) => { if (r.ok) window.location.href = 'dashboard.html'; })
+    .catch(() => {});
+
+  // No owner account created yet? Say so plainly instead of a confusing
+  // "invalid email or password" on the very first attempt.
+  fetch('/api/auth/setup-status')
+    .then((r) => r.json())
+    .then((data) => {
+      if (!data.hasOwner) {
+        setupNotice.textContent = 'No owner account exists yet. On the server, run: npm run seed — it prints a login email and password to the terminal.';
+        setupNotice.classList.add('is-visible');
+        submitBtn.disabled = true;
+      }
+    })
     .catch(() => {});
 
   form.addEventListener('submit', async (e) => {

@@ -230,6 +230,27 @@
       <div class="panel" id="settingsForm">
         <div class="skeleton-row"></div>
       </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Change Password</h2></div>
+        <form id="passwordForm">
+          <div class="form-group">
+            <label for="pwCurrent">Current Password</label>
+            <input type="password" id="pwCurrent" autocomplete="current-password" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pwNew">New Password</label>
+              <input type="password" id="pwNew" autocomplete="new-password" minlength="8" required>
+            </div>
+            <div class="form-group">
+              <label for="pwConfirm">Confirm New Password</label>
+              <input type="password" id="pwConfirm" autocomplete="new-password" minlength="8" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-outline-dark">Update Password</button>
+        </form>
+      </div>
     </section>
 
   </main>

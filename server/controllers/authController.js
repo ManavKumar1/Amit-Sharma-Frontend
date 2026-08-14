@@ -52,4 +52,34 @@ async function me(req, res) {
   res.json(user);
 }
 
-module.exports = { login, logout, me, COOKIE_NAME };
+// Public — lets login.html tell the difference between "wrong password"
+// and "nobody has run the seed script yet" without leaking any account details.
+async function setupStatus(req, res) {
+  const count = await User.countDocuments();
+  res.json({ hasOwner: count > 0 });
+}
+
+async function changePassword(req, res) {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current and new password are both required.' });
+  }
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+  }
+
+  const user = await User.findById(req.userId);
+  if (!user) return res.status(404).json({ error: 'User not found.' });
+
+  const match = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!match) {
+    return res.status(401).json({ error: 'Current password is incorrect.' });
+  }
+
+  user.passwordHash = await bcrypt.hash(newPassword, 10);
+  await user.save();
+  res.json({ ok: true });
+}
+
+module.exports = { login, logout, me, setupStatus, changePassword, COOKIE_NAME };

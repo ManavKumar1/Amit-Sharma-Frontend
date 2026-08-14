@@ -20,7 +20,7 @@
     el.className = 'toast' + (isError ? ' is-error' : '');
     el.textContent = message;
     toastStack.appendChild(el);
-    setTimeout(() => el.remove(), 3000);
+    setTimeout(() => el.remove(), 4000);
   }
 
   /* ---------------- AUTH GUARD ---------------- */
@@ -924,6 +924,36 @@
       container.innerHTML = `<div class="empty-state">${err.message}</div>`;
     }
   }
+
+  /* ================================================================
+     CHANGE PASSWORD
+  ================================================================ */
+  document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const current = document.getElementById('pwCurrent').value;
+    const next = document.getElementById('pwNew').value;
+    const confirm = document.getElementById('pwConfirm').value;
+
+    if (next !== confirm) {
+      toast('New password and confirmation don\'t match.', true);
+      return;
+    }
+    if (next.length < 8) {
+      toast('New password must be at least 8 characters.', true);
+      return;
+    }
+
+    try {
+      await api('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword: current, newPassword: next }),
+      });
+      toast('Password updated.');
+      document.getElementById('passwordForm').reset();
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
 
   /* ================================================================
      MODAL SHELL
