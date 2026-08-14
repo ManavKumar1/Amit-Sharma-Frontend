@@ -125,40 +125,110 @@
       </div>
     </section>
 
-    <!-- ============ PLACEHOLDER SECTIONS ============ -->
+    <!-- ============ SERVICES ============ -->
     <section class="dash-section" id="section-services" hidden>
-      <div class="admin-topbar"><h1>Services</h1></div>
-      <div class="coming-soon">
-        <h3>Services management — next pass</h3>
-        <p>Add, edit, reorder, and price your services here. The public site already reads live service data once this section is built.</p>
+      <div class="admin-topbar">
+        <div>
+          <h1>Services</h1>
+          <p class="sub">What you offer, priced and timed.</p>
+        </div>
+        <button class="btn btn-primary" id="addServiceBtn">+ Add Service</button>
+      </div>
+      <div class="panel">
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="servicesTable">
+            <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Duration</th><th>Active</th><th></th></tr></thead>
+            <tbody><tr><td colspan="6"><div class="skeleton-row"></div></td></tr></tbody>
+          </table>
+        </div>
       </div>
     </section>
+
+    <!-- ============ PORTFOLIO ============ -->
     <section class="dash-section" id="section-portfolio" hidden>
-      <div class="admin-topbar"><h1>Portfolio</h1></div>
-      <div class="coming-soon">
-        <h3>Portfolio management — next pass</h3>
-        <p>Upload and organize gallery images (Cloudinary) here.</p>
+      <div class="admin-topbar">
+        <div>
+          <h1>Portfolio</h1>
+          <p class="sub">Gallery images shown on the public site.</p>
+        </div>
+        <button class="btn btn-primary" id="addPortfolioBtn">+ Add Image</button>
+      </div>
+      <div class="panel">
+        <div class="chip-row" id="portfolioFilterChips" style="margin-bottom:1.2rem;">
+          <button class="chip is-active" data-cat="all">All</button>
+          <button class="chip" data-cat="makeup">Makeup</button>
+          <button class="chip" data-cat="hair">Hair</button>
+          <button class="chip" data-cat="haircut">Haircut</button>
+          <button class="chip" data-cat="bridal">Bridal</button>
+          <button class="chip" data-cat="editorial">Editorial</button>
+        </div>
+        <div id="portfolioAdminGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
+          <div class="skeleton-row" style="height:160px;"></div>
+        </div>
       </div>
     </section>
+
+    <!-- ============ TESTIMONIALS ============ -->
     <section class="dash-section" id="section-testimonials" hidden>
-      <div class="admin-topbar"><h1>Testimonials</h1></div>
-      <div class="coming-soon">
-        <h3>Testimonial management — next pass</h3>
-        <p>Add, edit, and reorder client reviews here.</p>
+      <div class="admin-topbar">
+        <div>
+          <h1>Testimonials</h1>
+          <p class="sub">Client reviews shown on the public site.</p>
+        </div>
+        <button class="btn btn-primary" id="addTestimonialBtn">+ Add Review</button>
+      </div>
+      <div class="panel">
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="testimonialsTable">
+            <thead><tr><th>Client</th><th>Service</th><th>Rating</th><th>Active</th><th></th></tr></thead>
+            <tbody><tr><td colspan="5"><div class="skeleton-row"></div></td></tr></tbody>
+          </table>
+        </div>
       </div>
     </section>
+
+    <!-- ============ AVAILABILITY ============ -->
     <section class="dash-section" id="section-availability" hidden>
-      <div class="admin-topbar"><h1>Availability</h1></div>
-      <div class="coming-soon">
-        <h3>Availability &amp; blocked dates — next pass</h3>
-        <p>Set weekly hours and block off vacation days here. The API is already live at <code>/api/availability</code> and <code>/api/blocked-dates</code>.</p>
+      <div class="admin-topbar">
+        <div>
+          <h1>Availability</h1>
+          <p class="sub">Weekly hours and one-off blocked dates.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Weekly hours</h2></div>
+        <div id="availabilityForm"></div>
+        <button class="btn btn-primary" id="saveAvailabilityBtn" style="margin-top:1rem;">Save Hours</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Blocked dates</h2></div>
+        <div class="form-row" style="align-items:end;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="blockDateInput">Date</label>
+            <input type="date" id="blockDateInput">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="blockReasonInput">Reason (optional)</label>
+            <input type="text" id="blockReasonInput" placeholder="Holiday, vacation…">
+          </div>
+        </div>
+        <button class="btn btn-outline-dark" id="addBlockedDateBtn" style="margin-top:0.8rem;">+ Block This Date</button>
+        <ul id="blockedDatesList" style="margin-top:1.4rem;"></ul>
       </div>
     </section>
+
+    <!-- ============ SETTINGS ============ -->
     <section class="dash-section" id="section-settings" hidden>
-      <div class="admin-topbar"><h1>Settings</h1></div>
-      <div class="coming-soon">
-        <h3>Business settings — next pass</h3>
-        <p>Edit your name, bio, contact info, and hours here. The API is already live at <code>/api/profile</code>.</p>
+      <div class="admin-topbar">
+        <div>
+          <h1>Settings</h1>
+          <p class="sub">Business information shown across the public site.</p>
+        </div>
+      </div>
+      <div class="panel" id="settingsForm">
+        <div class="skeleton-row"></div>
       </div>
     </section>
 

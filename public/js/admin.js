@@ -20,7 +20,7 @@
     el.className = 'toast' + (isError ? ' is-error' : '');
     el.textContent = message;
     toastStack.appendChild(el);
-    setTimeout(() => el.remove(), 4000);
+    setTimeout(() => el.remove(), 3000);
   }
 
   /* ---------------- AUTH GUARD ---------------- */
@@ -56,6 +56,11 @@
     overview: loadOverview,
     bookings: () => loadBookings(''),
     inquiries: () => loadInquiries(''),
+    services: loadServices,
+    portfolio: () => loadPortfolioAdmin('all'),
+    testimonials: loadTestimonials,
+    availability: loadAvailabilitySection,
+    settings: loadSettings,
   };
 
   function showSection(name) {
@@ -413,6 +418,510 @@
       }
     } catch (err) {
       toast(err.message, true);
+    }
+  }
+
+  /* ================================================================
+     GENERIC FORM MODAL — used by Services & Testimonials
+     (Portfolio has its own modal below because of the file upload)
+  ================================================================ */
+  function renderField(f) {
+    const id = `field_${f.name}`;
+    const val = f.value === undefined || f.value === null ? '' : f.value;
+
+    if (f.type === 'checkbox') {
+      return `
+        <div class="form-group" style="display:flex;align-items:center;gap:0.6rem;">
+          <input type="checkbox" id="${id}" ${val ? 'checked' : ''} style="width:auto;">
+          <label for="${id}" style="margin:0;text-transform:none;font-weight:500;">${f.label}</label>
+        </div>`;
+    }
+    if (f.type === 'select') {
+      const opts = f.options.map((o) => `<option value="${o.value}" ${String(o.value) === String(val) ? 'selected' : ''}>${o.label}</option>`).join('');
+      return `<div class="form-group"><label for="${id}">${f.label}</label><select id="${id}">${opts}</select></div>`;
+    }
+    if (f.type === 'textarea') {
+      return `<div class="form-group"><label for="${id}">${f.label}</label><textarea id="${id}" rows="3">${val}</textarea></div>`;
+    }
+    return `<div class="form-group"><label for="${id}">${f.label}</label><input type="${f.type || 'text'}" id="${id}" value="${val}" ${f.step ? `step="${f.step}"` : ''}></div>`;
+  }
+
+  function openFormModal({ title, fields, onSubmit, onDelete }) {
+    renderModal(`
+      <div class="modal-head"><h2 style="font-size:1.3rem;">${title}</h2><button class="modal-close" id="modalClose">&times;</button></div>
+      <form id="genericForm">
+        ${fields.map(renderField).join('')}
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">Save</button>
+          ${onDelete ? '<button type="button" class="btn btn-outline-dark" id="genericDeleteBtn">Delete</button>' : ''}
+        </div>
+      </form>
+    `);
+
+    document.getElementById('genericForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const values = {};
+      fields.forEach((f) => {
+        const el = document.getElementById(`field_${f.name}`);
+        if (f.type === 'checkbox') values[f.name] = el.checked;
+        else if (f.type === 'number') values[f.name] = el.value === '' ? undefined : Number(el.value);
+        else values[f.name] = el.value;
+      });
+      try {
+        await onSubmit(values);
+        closeModal();
+      } catch (err) {
+        toast(err.message, true);
+      }
+    });
+
+    if (onDelete) {
+      document.getElementById('genericDeleteBtn').addEventListener('click', async () => {
+        if (!confirm('Delete this item? This cannot be undone.')) return;
+        try {
+          await onDelete();
+          closeModal();
+        } catch (err) {
+          toast(err.message, true);
+        }
+      });
+    }
+  }
+
+  /* ================================================================
+     SERVICES
+  ================================================================ */
+  async function loadServices() {
+    const tbody = document.querySelector('#servicesTable tbody');
+    tbody.innerHTML = '<tr><td colspan="6"><div class="skeleton-row"></div></td></tr>';
+    try {
+      const list = await api('/services');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No services yet — add your first one.</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map((s) => `
+        <tr>
+          <td data-label="Name">${s.name}</td>
+          <td data-label="Category">${s.category}</td>
+          <td data-label="Price">$${s.price}</td>
+          <td data-label="Duration">${s.duration} min</td>
+          <td data-label="Active">${s.isActive ? '<span class="badge badge-confirmed">Active</span>' : '<span class="badge badge-cancelled">Disabled</span>'}</td>
+          <td data-label=""><button class="btn btn-outline-dark" data-edit="${s._id}" style="padding:0.4em 1em;font-size:0.75rem;">Edit</button></td>
+        </tr>
+      `).join('');
+      tbody.querySelectorAll('[data-edit]').forEach((btn) => {
+        btn.addEventListener('click', () => openServiceModal(list.find((s) => s._id === btn.dataset.edit)));
+      });
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">${err.message}</div></td></tr>`;
+    }
+  }
+
+  document.getElementById('addServiceBtn').addEventListener('click', () => openServiceModal(null));
+
+  function openServiceModal(service) {
+    const fields = [
+      { name: 'name', label: 'Name', value: service?.name },
+      { name: 'description', label: 'Description', type: 'textarea', value: service?.description },
+      { name: 'category', label: 'Category', value: service?.category || 'General' },
+      { name: 'price', label: 'Price (USD)', type: 'number', value: service?.price },
+      { name: 'duration', label: 'Duration (minutes)', type: 'number', value: service?.duration },
+      { name: 'sortOrder', label: 'Display Order', type: 'number', value: service?.sortOrder ?? 0 },
+      { name: 'isActive', label: 'Active (visible on public site)', type: 'checkbox', value: service ? service.isActive : true },
+    ];
+
+    openFormModal({
+      title: service ? 'Edit Service' : 'Add Service',
+      fields,
+      onSubmit: async (values) => {
+        if (service) {
+          await api(`/services/${service._id}`, { method: 'PUT', body: JSON.stringify(values) });
+          toast('Service updated.');
+        } else {
+          await api('/services', { method: 'POST', body: JSON.stringify(values) });
+          toast('Service added.');
+        }
+        loadServices();
+      },
+      onDelete: service ? async () => {
+        await api(`/services/${service._id}`, { method: 'DELETE' });
+        toast('Service removed.');
+        loadServices();
+      } : null,
+    });
+  }
+
+  /* ================================================================
+     PORTFOLIO
+  ================================================================ */
+  let portfolioAdminCache = [];
+
+  const portfolioChips = document.getElementById('portfolioFilterChips');
+  portfolioChips.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    portfolioChips.querySelectorAll('.chip').forEach((c) => c.classList.remove('is-active'));
+    chip.classList.add('is-active');
+    loadPortfolioAdmin(chip.dataset.cat);
+  });
+
+  async function loadPortfolioAdmin(category) {
+    const grid = document.getElementById('portfolioAdminGrid');
+    grid.innerHTML = '<div class="skeleton-row" style="height:160px;"></div>';
+    try {
+      const qs = category && category !== 'all' ? `?category=${encodeURIComponent(category)}` : '';
+      const list = await api('/portfolio' + qs);
+      portfolioAdminCache = list;
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty-state">No images in this category yet.</div>';
+        return;
+      }
+      grid.innerHTML = list.map((p) => `
+        <div style="position:relative;border-radius:var(--radius);overflow:hidden;aspect-ratio:4/5;cursor:pointer;" data-edit="${p._id}">
+          <img src="${p.imageUrl}" alt="${p.title}" style="width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:0.5rem;background:linear-gradient(0deg,rgba(27,22,19,0.85),transparent);color:#fff;font-size:0.72rem;">
+            ${p.title || p.category}${p.isFeatured ? ' &#9733;' : ''}
+          </div>
+        </div>
+      `).join('');
+      grid.querySelectorAll('[data-edit]').forEach((el) => {
+        el.addEventListener('click', () => openPortfolioModal(portfolioAdminCache.find((p) => p._id === el.dataset.edit)));
+      });
+    } catch (err) {
+      grid.innerHTML = `<div class="empty-state">${err.message}</div>`;
+    }
+  }
+
+  document.getElementById('addPortfolioBtn').addEventListener('click', () => openPortfolioModal(null));
+
+  function openPortfolioModal(item) {
+    const categories = ['makeup', 'hair', 'haircut', 'bridal', 'editorial'];
+    renderModal(`
+      <div class="modal-head"><h2 style="font-size:1.3rem;">${item ? 'Edit Image' : 'Add Image'}</h2><button class="modal-close" id="modalClose">&times;</button></div>
+      <form id="portfolioForm">
+        <div class="form-group">
+          <label for="pfImage">Image</label>
+          <img id="pfPreview" src="${item ? item.imageUrl : ''}" alt="" style="width:100%;border-radius:var(--radius);margin-bottom:0.6rem;${item ? '' : 'display:none;'}">
+          <input type="file" id="pfImage" accept="image/jpeg,image/png,image/webp,image/gif">
+          <p style="font-size:0.76rem;color:var(--ink-70);margin-top:0.4rem;">${item ? 'Leave blank to keep the current image.' : 'JPG, PNG, WEBP, or GIF — up to 8MB.'}</p>
+        </div>
+        <div class="form-group"><label for="pfTitle">Title</label><input type="text" id="pfTitle" value="${item?.title || ''}"></div>
+        <div class="form-group"><label for="pfCaption">Caption</label><input type="text" id="pfCaption" value="${item?.caption || ''}"></div>
+        <div class="form-group">
+          <label for="pfCategory">Category</label>
+          <select id="pfCategory">${categories.map((c) => `<option value="${c}" ${item?.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+        </div>
+        <div class="form-group">
+          <label for="pfSize">Grid size</label>
+          <select id="pfSize">
+            <option value="" ${!item?.size ? 'selected' : ''}>Normal</option>
+            <option value="tall" ${item?.size === 'tall' ? 'selected' : ''}>Tall</option>
+            <option value="wide" ${item?.size === 'wide' ? 'selected' : ''}>Wide</option>
+          </select>
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:0.6rem;">
+          <input type="checkbox" id="pfFeatured" ${item?.isFeatured ? 'checked' : ''} style="width:auto;">
+          <label for="pfFeatured" style="margin:0;text-transform:none;font-weight:500;">Featured</label>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary" id="pfSubmit">Save</button>
+          ${item ? '<button type="button" class="btn btn-outline-dark" id="pfDelete">Delete</button>' : ''}
+        </div>
+      </form>
+    `);
+
+    document.getElementById('pfImage').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const preview = document.getElementById('pfPreview');
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
+    });
+
+    document.getElementById('portfolioForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('pfSubmit');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving…';
+
+      try {
+        let imageUrl = item ? item.imageUrl : null;
+        const file = document.getElementById('pfImage').files[0];
+        if (file) {
+          const formData = new FormData();
+          formData.append('image', file);
+          const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: formData });
+          const uploadData = await res.json();
+          if (!res.ok) throw new Error(uploadData.error || 'Upload failed.');
+          imageUrl = uploadData.url;
+        }
+        if (!imageUrl) throw new Error('Please choose an image.');
+
+        const payload = {
+          imageUrl,
+          title: document.getElementById('pfTitle').value,
+          caption: document.getElementById('pfCaption').value,
+          category: document.getElementById('pfCategory').value,
+          size: document.getElementById('pfSize').value,
+          isFeatured: document.getElementById('pfFeatured').checked,
+        };
+
+        if (item) {
+          await api(`/portfolio/${item._id}`, { method: 'PUT', body: JSON.stringify(payload) });
+          toast('Image updated.');
+        } else {
+          await api('/portfolio', { method: 'POST', body: JSON.stringify(payload) });
+          toast('Image added.');
+        }
+        closeModal();
+        loadPortfolioAdmin(portfolioChips.querySelector('.is-active').dataset.cat);
+      } catch (err) {
+        toast(err.message, true);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save';
+      }
+    });
+
+    const deleteBtn = document.getElementById('pfDelete');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        if (!confirm('Delete this image? This cannot be undone.')) return;
+        try {
+          await api(`/portfolio/${item._id}`, { method: 'DELETE' });
+          toast('Image removed.');
+          closeModal();
+          loadPortfolioAdmin(portfolioChips.querySelector('.is-active').dataset.cat);
+        } catch (err) {
+          toast(err.message, true);
+        }
+      });
+    }
+  }
+
+  /* ================================================================
+     TESTIMONIALS
+  ================================================================ */
+  async function loadTestimonials() {
+    const tbody = document.querySelector('#testimonialsTable tbody');
+    tbody.innerHTML = '<tr><td colspan="5"><div class="skeleton-row"></div></td></tr>';
+    try {
+      const list = await api('/testimonials');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No reviews yet — add your first one.</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map((t) => `
+        <tr>
+          <td data-label="Client">${t.clientName}</td>
+          <td data-label="Service">${t.service || '—'}</td>
+          <td data-label="Rating">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</td>
+          <td data-label="Active">${t.isActive ? '<span class="badge badge-confirmed">Active</span>' : '<span class="badge badge-cancelled">Hidden</span>'}</td>
+          <td data-label=""><button class="btn btn-outline-dark" data-edit="${t._id}" style="padding:0.4em 1em;font-size:0.75rem;">Edit</button></td>
+        </tr>
+      `).join('');
+      tbody.querySelectorAll('[data-edit]').forEach((btn) => {
+        btn.addEventListener('click', () => openTestimonialModal(list.find((t) => t._id === btn.dataset.edit)));
+      });
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">${err.message}</div></td></tr>`;
+    }
+  }
+
+  document.getElementById('addTestimonialBtn').addEventListener('click', () => openTestimonialModal(null));
+
+  function openTestimonialModal(t) {
+    const fields = [
+      { name: 'clientName', label: 'Client Name', value: t?.clientName },
+      { name: 'review', label: 'Review', type: 'textarea', value: t?.review },
+      { name: 'rating', label: 'Rating', type: 'select', value: t?.rating || 5, options: [5, 4, 3, 2, 1].map((n) => ({ value: n, label: `${n} stars` })) },
+      { name: 'service', label: 'Service / Occasion', value: t?.service },
+      { name: 'imageUrl', label: 'Photo URL (optional)', value: t?.imageUrl },
+      { name: 'isActive', label: 'Active (visible on public site)', type: 'checkbox', value: t ? t.isActive : true },
+    ];
+
+    openFormModal({
+      title: t ? 'Edit Review' : 'Add Review',
+      fields,
+      onSubmit: async (values) => {
+        if (t) {
+          await api(`/testimonials/${t._id}`, { method: 'PUT', body: JSON.stringify(values) });
+          toast('Review updated.');
+        } else {
+          await api('/testimonials', { method: 'POST', body: JSON.stringify(values) });
+          toast('Review added.');
+        }
+        loadTestimonials();
+      },
+      onDelete: t ? async () => {
+        await api(`/testimonials/${t._id}`, { method: 'DELETE' });
+        toast('Review removed.');
+        loadTestimonials();
+      } : null,
+    });
+  }
+
+  /* ================================================================
+     AVAILABILITY + BLOCKED DATES
+  ================================================================ */
+  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  async function loadAvailabilitySection() {
+    const form = document.getElementById('availabilityForm');
+    form.innerHTML = '<div class="skeleton-row"></div>';
+    try {
+      const rows = await api('/availability');
+      rows.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+      form.innerHTML = rows.map((r) => `
+        <div class="form-row" style="align-items:end;grid-template-columns:1fr 1fr 1fr auto;margin-bottom:0.6rem;" data-day="${r.dayOfWeek}">
+          <div style="font-size:0.9rem;padding-bottom:0.85em;font-weight:500;">${DAY_NAMES[r.dayOfWeek]}</div>
+          <div class="form-group" style="margin-bottom:0;"><label>Open</label><input type="time" class="av-start" value="${r.startTime}" ${!r.isAvailable ? 'disabled' : ''}></div>
+          <div class="form-group" style="margin-bottom:0;"><label>Close</label><input type="time" class="av-end" value="${r.endTime}" ${!r.isAvailable ? 'disabled' : ''}></div>
+          <div class="form-group" style="margin-bottom:0;display:flex;align-items:center;gap:0.4rem;">
+            <input type="checkbox" class="av-toggle" ${r.isAvailable ? 'checked' : ''} style="width:auto;">
+            <label style="margin:0;text-transform:none;">Open</label>
+          </div>
+        </div>
+      `).join('');
+
+      form.querySelectorAll('.av-toggle').forEach((cb) => {
+        cb.addEventListener('change', () => {
+          const row = cb.closest('[data-day]');
+          row.querySelector('.av-start').disabled = !cb.checked;
+          row.querySelector('.av-end').disabled = !cb.checked;
+        });
+      });
+    } catch (err) {
+      form.innerHTML = `<div class="empty-state">${err.message}</div>`;
+    }
+
+    loadBlockedDates();
+  }
+
+  document.getElementById('saveAvailabilityBtn').addEventListener('click', async () => {
+    const rows = Array.from(document.querySelectorAll('#availabilityForm [data-day]')).map((row) => ({
+      dayOfWeek: Number(row.dataset.day),
+      isAvailable: row.querySelector('.av-toggle').checked,
+      startTime: row.querySelector('.av-start').value,
+      endTime: row.querySelector('.av-end').value,
+    }));
+    try {
+      await api('/availability', { method: 'PUT', body: JSON.stringify(rows) });
+      toast('Hours saved.');
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  async function loadBlockedDates() {
+    const list = document.getElementById('blockedDatesList');
+    try {
+      const rows = await api('/blocked-dates');
+      if (!rows.length) {
+        list.innerHTML = '<li style="color:var(--ink-70);font-size:0.85rem;">No blocked dates.</li>';
+        return;
+      }
+      list.innerHTML = rows.map((r) => `
+        <li style="display:flex;justify-content:space-between;align-items:center;padding:0.6em 0;border-bottom:1px solid var(--line-on-porcelain);">
+          <span>${formatDatePretty(r.date)}${r.reason ? ' — ' + r.reason : ''}</span>
+          <button class="btn btn-outline-dark" data-remove="${r._id}" style="padding:0.3em 0.9em;font-size:0.72rem;">Remove</button>
+        </li>
+      `).join('');
+      list.querySelectorAll('[data-remove]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          try {
+            await api(`/blocked-dates/${btn.dataset.remove}`, { method: 'DELETE' });
+            loadBlockedDates();
+          } catch (err) {
+            toast(err.message, true);
+          }
+        });
+      });
+    } catch (err) {
+      list.innerHTML = `<li>${err.message}</li>`;
+    }
+  }
+
+  document.getElementById('addBlockedDateBtn').addEventListener('click', async () => {
+    const date = document.getElementById('blockDateInput').value;
+    const reason = document.getElementById('blockReasonInput').value;
+    if (!date) return toast('Pick a date first.', true);
+    try {
+      await api('/blocked-dates', { method: 'POST', body: JSON.stringify({ date, reason }) });
+      document.getElementById('blockDateInput').value = '';
+      document.getElementById('blockReasonInput').value = '';
+      toast('Date blocked.');
+      loadBlockedDates();
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  /* ================================================================
+     SETTINGS
+  ================================================================ */
+  async function loadSettings() {
+    const container = document.getElementById('settingsForm');
+    container.innerHTML = '<div class="skeleton-row"></div>';
+    try {
+      const p = await api('/profile');
+      container.innerHTML = `
+        <form id="settingsFormEl">
+          <div class="panel-head"><h2>Artist</h2></div>
+          <div class="form-group"><label for="stName">Name</label><input type="text" id="stName" value="${p.name || ''}"></div>
+          <div class="form-group"><label for="stTitle">Title</label><input type="text" id="stTitle" value="${p.title || ''}"></div>
+          <div class="form-group"><label for="stTagline">Tagline</label><input type="text" id="stTagline" value="${p.tagline || ''}"></div>
+          <div class="form-group"><label for="stBio">Bio</label><textarea id="stBio" rows="4">${p.bio || ''}</textarea></div>
+
+          <div class="panel-head" style="margin-top:1.5rem;"><h2>Contact</h2></div>
+          <div class="form-row">
+            <div class="form-group"><label for="stPhone">Phone</label><input type="text" id="stPhone" value="${p.phone || ''}" placeholder="+14155550148"></div>
+            <div class="form-group"><label for="stWhatsapp">WhatsApp (digits only)</label><input type="text" id="stWhatsapp" value="${p.whatsapp || ''}" placeholder="14155550148"></div>
+          </div>
+          <div class="form-group"><label for="stEmail">Email</label><input type="email" id="stEmail" value="${p.email || ''}"></div>
+
+          <div class="panel-head" style="margin-top:1.5rem;"><h2>Location</h2></div>
+          <div class="form-group"><label for="stAddress">Address</label><input type="text" id="stAddress" value="${p.address || ''}"></div>
+          <div class="form-group"><label for="stCity">City</label><input type="text" id="stCity" value="${p.city || ''}"></div>
+          <div class="form-group"><label for="stMaps">Google Maps URL</label><input type="text" id="stMaps" value="${p.mapsUrl || ''}"></div>
+
+          <div class="panel-head" style="margin-top:1.5rem;"><h2>Social</h2></div>
+          <div class="form-row">
+            <div class="form-group"><label for="stInstagram">Instagram URL</label><input type="text" id="stInstagram" value="${p.instagramUrl || ''}"></div>
+            <div class="form-group"><label for="stFacebook">Facebook URL</label><input type="text" id="stFacebook" value="${p.facebookUrl || ''}"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </form>
+      `;
+
+      document.getElementById('settingsFormEl').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          await api('/profile', {
+            method: 'PUT',
+            body: JSON.stringify({
+              name: document.getElementById('stName').value,
+              title: document.getElementById('stTitle').value,
+              tagline: document.getElementById('stTagline').value,
+              bio: document.getElementById('stBio').value,
+              phone: document.getElementById('stPhone').value,
+              whatsapp: document.getElementById('stWhatsapp').value,
+              email: document.getElementById('stEmail').value,
+              address: document.getElementById('stAddress').value,
+              city: document.getElementById('stCity').value,
+              mapsUrl: document.getElementById('stMaps').value,
+              instagramUrl: document.getElementById('stInstagram').value,
+              facebookUrl: document.getElementById('stFacebook').value,
+            }),
+          });
+          toast('Settings saved.');
+        } catch (err) {
+          toast(err.message, true);
+        }
+      });
+    } catch (err) {
+      container.innerHTML = `<div class="empty-state">${err.message}</div>`;
     }
   }
 

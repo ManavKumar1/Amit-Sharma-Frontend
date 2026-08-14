@@ -63,7 +63,7 @@
       <li><span class="k">WhatsApp</span><span class="v"><a href="${waLink(profile.whatsapp, `Hi ${profile.name}, I'd love to know more about your services.`)}" target="_blank" rel="noopener">Message on WhatsApp</a></span></li>
       <li><span class="k">Email</span><span class="v"><a href="mailto:${profile.email}">${profile.email}</a></span></li>
       <li><span class="k">Studio</span><span class="v">${profile.address}<br>${profile.city}</span></li>
-      <li><span class="k">Instagram</span><span class="v"><a href="${profile.instagramUrl}" target="_blank" rel="noopener">@mayaellisonmakeup</a></span></li>
+      <li><span class="k">Instagram</span><span class="v"><a href="${profile.instagramUrl}" target="_blank" rel="noopener">@AmitSharmamakeup</a></span></li>
     `;
 
     // Hours table
