@@ -22,6 +22,7 @@ const bookingRoutes = require('./routes/bookings');
 const availabilityRoutes = require('./routes/availability');
 const blockedDateRoutes = require('./routes/blockedDates');
 const dashboardRoutes = require('./routes/dashboard');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/blocked-dates', blockedDateRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/upload', uploadRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
@@ -77,7 +79,7 @@ app.use('/api', notFound);
 app.use(errorHandler);
 
 /* ---------------- START ---------------- */
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

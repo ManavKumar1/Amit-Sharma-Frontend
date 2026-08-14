@@ -1,4 +1,7 @@
+const fs = require('fs');
+const path = require('path');
 const Portfolio = require('../models/Portfolio');
+const { UPLOAD_DIR } = require('../middleware/upload');
 
 async function listPortfolio(req, res) {
   const filter = {};
@@ -26,8 +29,14 @@ async function updatePortfolioItem(req, res) {
 async function deletePortfolioItem(req, res) {
   const item = await Portfolio.findByIdAndDelete(req.params.id);
   if (!item) return res.status(404).json({ error: 'Portfolio item not found.' });
-  // Note: this only removes the MongoDB record. Deleting the matching
-  // Cloudinary asset happens in the Cloudinary integration stage.
+
+  // Clean up the file on disk if it's one of our own local uploads
+  // (leave external/seed URLs like picsum links alone).
+  if (item.imageUrl && item.imageUrl.startsWith('/assets/uploads/')) {
+    const filePath = path.join(UPLOAD_DIR, path.basename(item.imageUrl));
+    fs.unlink(filePath, () => {}); // best-effort, don't fail the request over it
+  }
+
   res.json({ ok: true, deleted: true });
 }
 

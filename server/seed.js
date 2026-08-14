@@ -75,7 +75,7 @@ async function seed() {
     console.log(`Seeded ${services.length} services.`);
   }
 
-  // Portfolio (placeholder images — replace via dashboard once Cloudinary is wired up)
+  // Portfolio (placeholder images — replace via the dashboard's image upload)
   const portfolio = [
     { imageUrl: 'https://picsum.photos/seed/port-bridal1/800/1000', title: 'Garden Ceremony Bridal', category: 'bridal', caption: 'Soft glam for an outdoor June wedding.', isFeatured: true },
     { imageUrl: 'https://picsum.photos/seed/port-makeup1/800/800', title: 'Editorial Skin', category: 'editorial', caption: 'Dewy base for a beauty editorial.' },

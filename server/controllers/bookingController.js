@@ -2,6 +2,20 @@ const Booking = require('../models/Booking');
 const Service = require('../models/Service');
 const checkSlotAvailable = require('../utils/checkSlotAvailable');
 
+// Public: just the taken start times for one date, no customer details —
+// used by book.html to gray out slots that are already spoken for.
+async function getBookedSlotsForDate(req, res) {
+  const { date } = req.query;
+  if (!date) return res.status(400).json({ error: 'date query param is required.' });
+
+  const rows = await Booking.find({
+    bookingDate: date,
+    status: { $in: ['pending', 'confirmed'] },
+  }).select('startTime -_id');
+
+  res.json(rows.map((r) => r.startTime));
+}
+
 async function listBookings(req, res) {
   const filter = {};
   if (req.query.status) filter.status = req.query.status;
@@ -90,4 +104,4 @@ async function updateBooking(req, res) {
   res.json(booking);
 }
 
-module.exports = { listBookings, getBooking, createBooking, updateBooking };
+module.exports = { listBookings, getBooking, createBooking, updateBooking, getBookedSlotsForDate };

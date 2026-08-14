@@ -4,14 +4,19 @@ const {
   getBooking,
   createBooking,
   updateBooking,
+  getBookedSlotsForDate,
 } = require('../controllers/bookingController');
 const { requireAuth } = require('../middleware/auth');
 const { validateBody } = require('../middleware/validation');
 
 const router = express.Router();
 
-// Every booking route is owner-only — customers never see bookings directly,
-// only the inquiry they submitted.
+// Public — no customer details, just which start times are taken on a date.
+// Must be registered before the owner-only gate below.
+router.get('/slots', getBookedSlotsForDate);
+
+// Every other booking route is owner-only — customers never see bookings
+// directly, only the inquiry they submitted.
 router.use(requireAuth);
 
 router.get('/', listBookings);
