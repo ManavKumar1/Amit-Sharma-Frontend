@@ -1,20 +1,18 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const {
+  listPortfolio,
+  createPortfolioItem,
+  updatePortfolioItem,
+  deletePortfolioItem,
+} = require('../controllers/portfolioController');
+const { requireAuth } = require('../middleware/auth');
+const { validateBody } = require('../middleware/validation');
 
-const portfolioSchema = new mongoose.Schema(
-  {
-    imageUrl: { type: String, required: true }, // local static path, e.g. /assets/uploads/xyz.jpg
-    title: { type: String, default: '' },
-    caption: { type: String, default: '' },
-    category: {
-      type: String,
-      enum: ['makeup', 'hair', 'haircut', 'bridal', 'editorial'],
-      required: true,
-    },
-    size: { type: String, enum: ['', 'tall', 'wide'], default: '' }, // grid layout hint
-    isFeatured: { type: Boolean, default: false },
-    sortOrder: { type: Number, default: 0 },
-  },
-  { timestamps: true }
-);
+const router = express.Router();
 
-module.exports = mongoose.model('Portfolio', portfolioSchema);
+router.get('/', listPortfolio);
+router.post('/', requireAuth, validateBody({ imageUrl: 'required', category: 'required' }), createPortfolioItem);
+router.put('/:id', requireAuth, updatePortfolioItem);
+router.delete('/:id', requireAuth, deletePortfolioItem);
+
+module.exports = router;
