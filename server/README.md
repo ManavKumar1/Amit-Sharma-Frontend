@@ -1,4 +1,4 @@
-# Maya Ellison — Makeup Artist & Hairstylist
+# Amit Sharma — Makeup Artist & Hairstylist
 
 Single-repo site: static frontend (HTML/CSS/vanilla JS) served by one Express app,
 backed by MongoDB via Mongoose. No React, no separate backend service, no browser

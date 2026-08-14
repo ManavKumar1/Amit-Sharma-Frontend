@@ -81,7 +81,7 @@
   showSection(currentSection());
 
   /* ---------------- PROFILE (for WhatsApp message template) ---------------- */
-  let artistName = 'Maya';
+  let artistName = 'Amit';
   api('/profile').then((p) => { if (p && p.name) artistName = p.name.split(' ')[0]; }).catch(() => {});
 
   function waLink(phone, message) {

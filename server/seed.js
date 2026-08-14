@@ -26,7 +26,7 @@ async function seed() {
   const passwordHash = await bcrypt.hash(OWNER_PASSWORD, 10);
   await User.findOneAndUpdate(
     { email: OWNER_EMAIL },
-    { name: 'Maya Ellison', email: OWNER_EMAIL, passwordHash },
+    { name: 'Amit Sharma', email: OWNER_EMAIL, passwordHash },
     { upsert: true }
   );
   console.log(`Owner account ready: ${OWNER_EMAIL} / ${OWNER_PASSWORD}`);
@@ -36,13 +36,13 @@ async function seed() {
   await Profile.findOneAndUpdate(
     {},
     {
-      name: 'Maya Ellison',
+      name: 'Amit Sharma',
       title: 'Makeup Artist & Hairstylist',
       tagline: "Beauty and hair for weddings, editorial shoots, and nights you'll want to remember.",
-      bio: 'Maya trained at the Cinema Makeup School in Los Angeles before spending six years on bridal and editorial teams across the Bay Area.',
+      bio: 'Amit trained at the Cinema Makeup School in Los Angeles before spending six years on bridal and editorial teams across the Bay Area.',
       phone: '+14155550148',
       whatsapp: '14155550148',
-      email: 'hello@mayaellison.com',
+      email: 'hello@AmitSharma.com',
       address: '548 Sutter Street, Suite 3',
       city: 'San Francisco, CA 94102',
       mapsUrl: 'https://maps.google.com/?q=548+Sutter+Street+San+Francisco',
@@ -91,7 +91,7 @@ async function seed() {
 
   // Testimonials
   const testimonials = [
-    { clientName: 'Priya S.', rating: 5, service: 'Bridal Makeup', imageUrl: 'https://picsum.photos/seed/client1/100/100', review: "Maya made my entire wedding morning feel calm. My makeup didn't move for fourteen hours." },
+    { clientName: 'Priya S.', rating: 5, service: 'Bridal Makeup', imageUrl: 'https://picsum.photos/seed/client1/100/100', review: "Amit made my entire wedding morning feel calm. My makeup didn't move for fourteen hours." },
     { clientName: 'Elena R.', rating: 5, service: 'Editorial Shoot', imageUrl: 'https://picsum.photos/seed/client2/100/100', review: 'Booked her for a shoot and she read the mood board perfectly on the first try.' },
     { clientName: 'Jordan T.', rating: 5, service: 'Hair Styling', imageUrl: 'https://picsum.photos/seed/client3/100/100', review: 'Best blowout I have ever had. Still looked good three days later.' },
   ];
