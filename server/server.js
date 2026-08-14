@@ -26,6 +26,14 @@ const uploadRoutes = require('./routes/upload');
 
 const app = express();
 
+// Render (and most PaaS hosts) sit behind a reverse proxy and set
+// X-Forwarded-For. Without this, express-rate-limit can't safely resolve
+// the real client IP and throws ERR_ERL_UNEXPECTED_X_FORWARDED_FOR — which
+// was silently hanging requests instead of responding. '1' = trust exactly
+// one hop (the platform's own proxy), which is the correct/safe setting
+// here — not 'true', which would trust the header from anyone.
+app.set('trust proxy', 1);
+
 /* ---------------- SECURITY & PARSING ---------------- */
 app.use(
   helmet({

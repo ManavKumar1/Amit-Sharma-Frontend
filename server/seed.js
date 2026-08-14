@@ -26,7 +26,7 @@ async function seed() {
   const passwordHash = await bcrypt.hash(OWNER_PASSWORD, 10);
   await User.findOneAndUpdate(
     { email: OWNER_EMAIL },
-    { name: 'Amit Sharma', email: OWNER_EMAIL, passwordHash },
+    { name: 'Maya Ellison', email: OWNER_EMAIL, passwordHash },
     { upsert: true }
   );
   console.log(`Owner account ready: ${OWNER_EMAIL} / ${OWNER_PASSWORD}`);
@@ -36,13 +36,13 @@ async function seed() {
   await Profile.findOneAndUpdate(
     {},
     {
-      name: 'Amit Sharma',
+      name: 'Maya Ellison',
       title: 'Makeup Artist & Hairstylist',
       tagline: "Beauty and hair for weddings, editorial shoots, and nights you'll want to remember.",
-      bio: 'Amit trained at the Cinema Makeup School in Los Angeles before spending six years on bridal and editorial teams across the Bay Area.',
+      bio: 'Maya trained at the Cinema Makeup School in Los Angeles before spending six years on bridal and editorial teams across the Bay Area.',
       phone: '+14155550148',
       whatsapp: '14155550148',
-      email: 'hello@AmitSharma.com',
+      email: 'hello@mayaellison.com',
       address: '548 Sutter Street, Suite 3',
       city: 'San Francisco, CA 94102',
       mapsUrl: 'https://maps.google.com/?q=548+Sutter+Street+San+Francisco',
@@ -61,7 +61,8 @@ async function seed() {
     { upsert: true }
   );
 
-  // Services
+  // Services — upsert by name so re-running seed repairs anything missing
+  // without duplicating what's already there.
   const services = [
     { name: 'Bridal Makeup', description: 'Full bridal beat with trial run included, false lashes, and touch-up kit.', price: 285, duration: 120, category: 'Bridal', sortOrder: 1 },
     { name: 'Party Makeup', description: 'Event-ready makeup for weddings, galas, and nights out.', price: 135, duration: 60, category: 'Makeup', sortOrder: 2 },
@@ -70,10 +71,10 @@ async function seed() {
     { name: 'Precision Haircut', description: 'Consultation and cut tailored to face shape and hair texture.', price: 95, duration: 45, category: 'Haircut', sortOrder: 5 },
     { name: "Groom's Grooming", description: 'Skin prep, light contour, and hair styling for the groom or groomsmen.', price: 85, duration: 40, category: 'Grooming', sortOrder: 6 },
   ];
-  if ((await Service.countDocuments()) === 0) {
-    await Service.insertMany(services);
-    console.log(`Seeded ${services.length} services.`);
+  for (const item of services) {
+    await Service.findOneAndUpdate({ name: item.name }, item, { upsert: true, setDefaultsOnInsert: true });
   }
+  console.log(`Services seeded/verified: ${services.length}.`);
 
   // Portfolio (placeholder images — replace via the dashboard's image upload)
   const portfolio = [
@@ -84,34 +85,37 @@ async function seed() {
     { imageUrl: 'https://picsum.photos/seed/port-makeup2/800/800', title: 'Bronze Evening', category: 'makeup', caption: 'Warm smoked eye for an evening gala.', isFeatured: true },
     { imageUrl: 'https://picsum.photos/seed/port-bridal2/900/700', title: 'Vineyard Bride', category: 'bridal', caption: 'Natural bridal look, matte skin, soft brow.' },
   ];
-  if ((await Portfolio.countDocuments()) === 0) {
-    await Portfolio.insertMany(portfolio);
-    console.log(`Seeded ${portfolio.length} portfolio items.`);
+  for (const item of portfolio) {
+    await Portfolio.findOneAndUpdate({ title: item.title }, item, { upsert: true, setDefaultsOnInsert: true });
   }
+  console.log(`Portfolio seeded/verified: ${portfolio.length}.`);
 
-  // Testimonials
+  // Testimonials — upsert by clientName + service so re-running is safe.
   const testimonials = [
-    { clientName: 'Priya S.', rating: 5, service: 'Bridal Makeup', imageUrl: 'https://picsum.photos/seed/client1/100/100', review: "Amit made my entire wedding morning feel calm. My makeup didn't move for fourteen hours." },
+    { clientName: 'Priya S.', rating: 5, service: 'Bridal Makeup', imageUrl: 'https://picsum.photos/seed/client1/100/100', review: "Maya made my entire wedding morning feel calm. My makeup didn't move for fourteen hours." },
     { clientName: 'Elena R.', rating: 5, service: 'Editorial Shoot', imageUrl: 'https://picsum.photos/seed/client2/100/100', review: 'Booked her for a shoot and she read the mood board perfectly on the first try.' },
     { clientName: 'Jordan T.', rating: 5, service: 'Hair Styling', imageUrl: 'https://picsum.photos/seed/client3/100/100', review: 'Best blowout I have ever had. Still looked good three days later.' },
   ];
-  if ((await Testimonial.countDocuments()) === 0) {
-    await Testimonial.insertMany(testimonials);
-    console.log(`Seeded ${testimonials.length} testimonials.`);
-  }
-
-  // Availability
-  if ((await Availability.countDocuments()) === 0) {
-    await Availability.insertMany(
-      [0, 1, 2, 3, 4, 5, 6].map((dayOfWeek) => ({
-        dayOfWeek,
-        startTime: '10:00',
-        endTime: '19:00',
-        isAvailable: dayOfWeek !== 0,
-      }))
+  for (const item of testimonials) {
+    await Testimonial.findOneAndUpdate(
+      { clientName: item.clientName, service: item.service },
+      item,
+      { upsert: true, setDefaultsOnInsert: true }
     );
-    console.log('Seeded weekly availability.');
   }
+  console.log(`Testimonials seeded/verified: ${testimonials.length}.`);
+
+  // Availability — upsert by dayOfWeek (same pattern the dashboard's Save Hours uses).
+  const availabilityDefaults = [0, 1, 2, 3, 4, 5, 6].map((dayOfWeek) => ({
+    dayOfWeek,
+    startTime: '10:00',
+    endTime: '19:00',
+    isAvailable: dayOfWeek !== 0,
+  }));
+  for (const day of availabilityDefaults) {
+    await Availability.findOneAndUpdate({ dayOfWeek: day.dayOfWeek }, day, { upsert: true, setDefaultsOnInsert: true });
+  }
+  console.log('Weekly availability seeded/verified.');
 
   console.log('Seed complete.');
   process.exit(0);
