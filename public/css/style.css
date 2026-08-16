@@ -225,7 +225,7 @@ h1, h2, h3, h4 {
 }
 .btn-primary {
   background: var(--white);
-  color: var(--black);
+  color: var(--black)!important;
 }
 .btn-primary:hover { background: var(--violet-1); transform: translateY(-1px); box-shadow: 0 10px 26px var(--accent-glow); }
 .btn-sm { padding: 0.6em 1.35em; font-size: 0.7rem; }
