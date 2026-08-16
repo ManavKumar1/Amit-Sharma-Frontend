@@ -63,7 +63,7 @@
       <li><span class="k">WhatsApp</span><span class="v"><a href="${waLink(profile.whatsapp, `Hi ${profile.name}, I'd love to know more about your services.`)}" target="_blank" rel="noopener">Message on WhatsApp</a></span></li>
       <li><span class="k">Email</span><span class="v"><a href="mailto:${profile.email}">${profile.email}</a></span></li>
       <li><span class="k">Studio</span><span class="v">${profile.address}<br>${profile.city}</span></li>
-      <li><span class="k">Instagram</span><span class="v"><a href="${profile.instagramUrl}" target="_blank" rel="noopener">@AmitSharmamakeup</a></span></li>
+      <li><span class="k">Instagram</span><span class="v"><a href="${profile.instagramUrl}" target="_blank" rel="noopener">@amitsharmamakeup</a></span></li>
     `;
 
     // Hours table
@@ -113,6 +113,8 @@
     grid.innerHTML = items.map((item, i) => `
       <button class="portfolio-item ${item.size ? 'size-' + item.size : ''} reveal" data-index="${i}" aria-label="View ${item.title} full screen">
         <img src="${item.imageUrl}" alt="${item.title} — ${item.category}" loading="lazy">
+        <span class="portfolio-index">N°${String(i + 1).padStart(2, '0')}</span>
+        ${item.isFeatured ? '<span class="portfolio-star" aria-hidden="true">&#10022;</span>' : ''}
         <span class="portfolio-caption">
           <span class="cat">${item.category}</span>
           <span class="title">${item.title}</span>
