@@ -1459,7 +1459,7 @@ h1, h2, h3, h4 {
   z-index: 150;
   width: 56px; height: 56px;
   border-radius: 50%;
-  background: var(--white);
+  background: var(--violet-1); 
   color: var(--black);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
