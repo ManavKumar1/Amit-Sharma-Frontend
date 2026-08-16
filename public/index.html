@@ -17,6 +17,7 @@
 <link rel="canonical" href="https://example.com/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💄</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="css/style.css">
 
 <script type="application/ld+json">
@@ -40,11 +41,15 @@
 }
 </script>
 </head>
-<body>
+<body id="top">
 
 <div class="grain-overlay" aria-hidden="true"></div>
 
+<!-- ============ PRELOADER ============ -->
 <div class="preloader" id="preloader" aria-hidden="true">
+  <div class="preloader-marks">
+    <span class="pl-mark pl-mark-a">A</span><span class="pl-mark pl-mark-s">S</span>
+  </div>
   <span class="preloader-mark">Amit Sharma</span>
   <div class="preloader-bar"><span></span></div>
 </div>
@@ -63,17 +68,29 @@
 <!-- ============ NAVIGATION ============ -->
 <header class="site-header" id="siteHeader">
   <div class="container nav-inner">
-    <a href="#" class="brand">Amit Sharma</a>
+    <a href="#top" class="brand-mobile">Amit Sharma</a>
+
+    <a href="#top" class="brand-desktop" aria-label="Amit Sharma — home">
+      <span class="brand-mark"><span class="script">A</span>S</span>
+      <span class="brand-name">Amit Sharma</span>
+      <span class="brand-caption">Makeup <span class="dot">✦</span> Hair</span>
+    </a>
+
     <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu">
       <span></span>
     </button>
+
     <nav id="navLinks" class="nav-links" aria-label="Primary">
-      <a href="#work">Work</a>
-      <a href="#services">Services</a>
-      <a href="#about">About</a>
-      <a href="#reviews">Reviews</a>
-      <a href="#contact">Contact</a>
-      <a href="book.html" class="btn btn-primary">Book Appointment</a>
+      <div class="nav-group nav-group-left">
+        <a href="#work">Work</a>
+        <a href="#services">Services</a>
+        <a href="#reviews">Reviews</a>
+      </div>
+      <div class="nav-group nav-group-right">
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a href="book.html" class="btn btn-primary btn-sm">Book Appointment</a>
+      </div>
     </nav>
   </div>
 </header>
@@ -82,23 +99,20 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero">
-    <!-- <div class="hero-media"> -->
-      <!-- <img src="https://picsum.photos/seed/amit-hero/1600/2000" alt="Portrait of Amit Sharma at work, applying makeup under studio lighting" loading="eager"> -->
-      <!-- <video id="heroVideo" muted autoplay loop playsinline preload="none" poster="https://picsum.photos/seed/amit-hero/1600/2000">
-        <source src="assets/hero-reel.mp4" type="video/mp4">
-      </video> -->
-    <!-- </div> -->
-    <div class="hero-scrim"></div>
-
-    <div class="hero-spine" aria-hidden="true">
-      <div class="hero-spine-track">MAKEUP <span>·</span> HAIR <span>·</span> EDITORIAL <span>·</span> BRIDAL <span>·</span> RUNWAY <span>·</span></div>
+    <div class="hero-collage" aria-hidden="true">
+      <img class="hero-photo hp-1" src="https://picsum.photos/seed/amit-work-1/500/650" alt="" loading="eager">
+      <img class="hero-photo hp-2" src="https://picsum.photos/seed/amit-work-2/460/600" alt="" loading="eager">
+      <img class="hero-photo hp-3" src="https://picsum.photos/seed/amit-work-3/560/720" alt="" loading="eager">
+      <img class="hero-photo hp-4" src="https://picsum.photos/seed/amit-work-4/460/600" alt="" loading="eager">
+      <img class="hero-photo hp-5" src="https://picsum.photos/seed/amit-work-5/480/620" alt="" loading="eager">
     </div>
 
     <div class="hero-content container">
-      <span class="hero-kicker">Independent Makeup Artist &amp; Hairstylist</span>
-      <h1 class="hero-name">Amit <em>Sharma</em></h1>
-      <p class="hero-role">Makeup and hair for editorial shoots, red-carpet nights, and weddings that deserve the full glam.</p>
-      <p class="hero-location">San Francisco, California</p>
+      <p class="hero-kicker">Independent Makeup Artist &amp; Hairstylist <span class="dot">✦</span> San Francisco</p>
+      <h1 class="hero-headline">
+        <span class="hh-line">Making the everyday</span>
+        <span class="hh-accent">extraordinary</span>
+      </h1>
       <div class="hero-ctas">
         <a href="book.html" class="btn btn-primary">Book an Appointment</a>
         <a href="#work" class="btn btn-outline-light">View My Work</a>
@@ -128,22 +142,55 @@
     </div>
   </div>
 
-  <!-- ============ SIGNATURE BREAK ============ -->
-  <section class="signature-break">
-    <div class="mega-word">Amit <span class="accent">Sharma</span></div>
-  </section>
+  <!-- ============ ABOUT (scroll-scrub two-column statement, like the reference's "About us") ============ -->
+  <section class="section about-section" id="about">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">About Amit</span>
+      </div>
+      <div class="about-text-grid">
+        <p class="about-col" data-col="1">Amit is an independent makeup artist and hairstylist based in San Francisco, trained at the Cinema Makeup School in Los Angeles, with ten years across bridal and editorial teams throughout the Bay Area.</p>
+        <p class="about-col" data-col="2">Every look starts with what's already there — great makeup isn't about hiding, it's about revealing what's already extraordinary.</p>
+      </div>
 
-  <!-- ============ PHILOSOPHY (pinned scroll sequence) ============ -->
-  <section class="philosophy" id="philosophySection">
-    <div class="container philosophy-inner">
-      <p class="philo-phrase" data-pos="1">Great makeup</p>
-      <p class="philo-phrase" data-pos="2">isn't about hiding.</p>
-      <p class="philo-phrase" data-pos="3">It's about revealing</p>
-      <p class="philo-phrase" data-pos="4">what's already <em>extraordinary</em>.</p>
+      <div class="about-media-row">
+        <div class="about-media reveal">
+          <img src="https://picsum.photos/seed/amit-portrait/700/900" alt="Amit Sharma smiling in his studio, holding a makeup brush" loading="lazy">
+        </div>
+        <div class="about-side reveal">
+          <p class="about-note">His own time in front of the camera as a model taught him exactly what holds up under studio lights and camera flash — skin that still looks like skin, and a kit built entirely around what actually survives a twelve-hour shoot day.</p>
+          <div class="about-specialisms">
+            <span class="tag-pill">Bridal</span>
+            <span class="tag-pill">Editorial</span>
+            <span class="tag-pill">Red Carpet</span>
+            <span class="tag-pill">Airbrush</span>
+            <span class="tag-pill">Precision Cuts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-band">
+      <div class="container stat-band-inner">
+        <div class="stat-band-item"><span class="num">10+</span><span class="label">Years Experience</span></div>
+        <div class="stat-band-item"><span class="num">300+</span><span class="label">Looks Created</span></div>
+        <div class="stat-band-item"><span class="num">4.9</span><span class="label">Average Rating</span></div>
+        <div class="stat-band-item"><span class="num">25+</span><span class="label">Editorial Shoots</span></div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ FEATURED WORK / PORTFOLIO (dark) ============ -->
+  <!-- ============ STATEMENT (pinned scroll-scrub, like "We bring together... iconic") ============ -->
+  <section class="statement-band" id="statementSection">
+    <div class="container statement-inner">
+      <p class="statement-line" data-line="1">Every appointment is a collaboration —</p>
+      <p class="statement-line" data-line="2">a partnership between artist and client,</p>
+      <p class="statement-line" data-line="3">creating a finished look that's</p>
+      <span class="statement-accent" data-line="4">flawless</span>
+    </div>
+  </section>
+
+  <!-- ============ FEATURED WORK / PORTFOLIO (dark, roster-grid style) ============ -->
   <section class="section section--dark" id="work">
     <div class="container">
       <div class="section-head">
@@ -151,8 +198,6 @@
         <h2 class="section-heading">Selected <em>work</em></h2>
         <p class="section-intro">A look across editorial, bridal, and red-carpet beauty — every image from a real appointment or shoot.</p>
       </div>
-
-      <div class="section-divider-word" aria-hidden="true"><div class="mega-word">Work</div></div>
 
       <div class="filter-bar" id="filterBar" role="tablist" aria-label="Filter portfolio by category">
         <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">All</button>
@@ -163,8 +208,11 @@
         <button class="filter-btn" data-filter="editorial" role="tab" aria-selected="false">Editorial</button>
       </div>
 
-      <div class="portfolio-grid" id="portfolioGrid" aria-live="polite">
-        <!-- populated by js/main.js -->
+      <div class="portfolio-wrap">
+        <div class="portfolio-bg-word" aria-hidden="true">Work</div>
+        <div class="portfolio-grid" id="portfolioGrid" aria-live="polite">
+          <!-- populated by js/main.js -->
+        </div>
       </div>
     </div>
   </section>
@@ -179,42 +227,6 @@
       </div>
       <div class="services-list" id="servicesList">
         <!-- populated by js/main.js -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ ABOUT (light, with dark stat band) ============ -->
-  <section class="section" id="about">
-    <div class="container about-grid">
-      <div class="about-media reveal">
-        <img src="https://picsum.photos/seed/amit-portrait/700/900" alt="Amit Sharma smiling in his studio, holding a makeup brush" loading="lazy">
-        <div class="about-media-frame" aria-hidden="true"></div>
-      </div>
-      <div class="about-copy reveal">
-        <span class="eyebrow">About Amit</span>
-        <h2 class="section-heading">Ten years of making people <em>feel like themselves</em>, only more so.</h2>
-        <p class="section-intro" style="max-width:56ch;">
-          Amit trained at the Cinema Makeup School in Los Angeles before spending six years on bridal and
-          editorial teams across the Bay Area. His own time in front of the camera as a model taught him
-          exactly what holds up under studio lights and camera flash — skin that still looks like skin,
-          and a kit built entirely around what actually survives a twelve-hour shoot day.
-        </p>
-        <div class="about-specialisms">
-          <span class="tag-pill">Bridal</span>
-          <span class="tag-pill">Editorial</span>
-          <span class="tag-pill">Red Carpet</span>
-          <span class="tag-pill">Airbrush</span>
-          <span class="tag-pill">Precision Cuts</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="stat-band">
-      <div class="container stat-band-inner">
-        <div class="stat-band-item"><span class="num">10+</span><span class="label">Years Experience</span></div>
-        <div class="stat-band-item"><span class="num">300+</span><span class="label">Looks Created</span></div>
-        <div class="stat-band-item"><span class="num">4.9</span><span class="label">Average Rating</span></div>
-        <div class="stat-band-item"><span class="num">25+</span><span class="label">Editorial Shoots</span></div>
       </div>
     </div>
   </section>
@@ -244,7 +256,7 @@
   <section class="cta-band">
     <div class="container">
       <span class="eyebrow" style="justify-content:center;">Ready when you are</span>
-      <h2>Let's find your <em>appointment</em>.</h2>
+      <h2 class="section-heading">Let's find your <em>appointment</em>.</h2>
       <a href="book.html" class="btn btn-primary">Book an Appointment</a>
     </div>
   </section>
@@ -264,10 +276,23 @@
         <table class="hours-table" id="hoursTable">
           <!-- populated by js/main.js -->
         </table>
-        <div class="map-frame" style="margin-top:1.6rem;">
+        <div class="map-frame contact-map" style="margin-top:1.6rem;">
           <iframe title="Studio location map" loading="lazy" src="https://maps.google.com/maps?q=548%20Sutter%20Street%20San%20Francisco&t=&z=14&ie=UTF8&iwloc=&output=embed"></iframe>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ NEWSLETTER ============ -->
+  <section class="newsletter-band">
+    <div class="container">
+      <span class="eyebrow" style="justify-content:center;">Stay in the loop</span>
+      <h2 class="section-heading newsletter-heading"><span class="swash">S</span>ubscribe to the <span class="swash">N</span>ewsletter</h2>
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" id="newsletterEmail" placeholder="Enter your email" required autocomplete="email">
+        <button type="submit" aria-label="Subscribe">&#8594;</button>
+      </form>
+      <p class="newsletter-note" id="newsletterNote">Beauty tips, new availability, and behind-the-scenes — no spam, unsubscribe anytime.</p>
     </div>
   </section>
 
@@ -275,22 +300,48 @@
 
 <!-- ============ FOOTER ============ -->
 <footer class="site-footer">
-  <div class="footer-bookend" aria-hidden="true"><div class="mega-word">Amit Sharma</div></div>
   <div class="container">
     <div class="footer-top">
       <div>
-        <div class="footer-brand">Amit Sharma</div>
-        <p style="margin-top:0.5rem;font-size:0.85rem;color:var(--porcelain-85);max-width:32ch;">Makeup artist &amp; hairstylist, San Francisco. By appointment only.</p>
+        <a href="#top" class="footer-brand-mark" aria-label="Amit Sharma — back to top">
+          <span class="brand-mark"><span class="script">A</span>S</span>
+          <span class="brand-name">Amit Sharma</span>
+        </a>
+        <p class="footer-tagline">Makeup artist &amp; hairstylist, San Francisco. By appointment only.</p>
       </div>
-      <div class="footer-social" aria-label="Social links">
-        <a href="#" aria-label="Instagram" target="_blank" rel="noopener">IG</a>
-        <a href="#" aria-label="Facebook" target="_blank" rel="noopener">FB</a>
+      <div>
+        <div class="footer-col-title">Explore</div>
+        <nav class="footer-nav">
+          <a href="#work">Work</a>
+          <a href="#services">Services</a>
+          <a href="#about">About</a>
+          <a href="book.html">Booking</a>
+        </nav>
+      </div>
+      <div>
+        <div class="footer-col-title">Info</div>
+        <nav class="footer-nav">
+          <a href="#contact">Contact</a>
+          <a href="#reviews">Reviews</a>
+          <a href="admin/login.html">Owner Login</a>
+        </nav>
+      </div>
+      <div>
+        <div class="footer-col-title">Follow</div>
+        <div class="footer-social" aria-label="Social links">
+          <a href="#" aria-label="Instagram" target="_blank" rel="noopener">IG</a>
+          <a href="#" aria-label="Facebook" target="_blank" rel="noopener">FB</a>
+        </div>
       </div>
     </div>
     <div class="footer-bottom">
+      <a href="#top" class="back-to-top">back to top <span aria-hidden="true">&#8593;</span></a>
       <span>© <span id="year"></span> Amit Sharma. All rights reserved.</span>
-      <a href="admin/login.html" style="color:rgba(243,238,231,0.4);font-size:0.78rem;">Owner Login</a>
     </div>
+  </div>
+  <div class="footer-bookend" aria-hidden="true">
+    <div class="mega-word">Amit</div>
+    <div class="mega-word">Sharma</div>
   </div>
 </footer>
 

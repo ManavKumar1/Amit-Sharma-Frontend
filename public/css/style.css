@@ -1,13 +1,14 @@
 /* =========================================================
    AMIT SHARMA — Makeup Artist & Hairstylist
-   Design system: black-field editorial / kinetic type
-   Pure black + white + one violet-gradient accent.
-   Structure mirrors an awwwards-tier reference build; every
-   class below is still driven by the exact same api.js /
-   main.js / booking.js data flow — only the visual layer changed.
+   Design system: black-field editorial / kinetic type.
+   Reference: awwwards-tier agency build (scattered photo hero,
+   script-accent headlines, pinned scroll statements, roster-style
+   portfolio grid, huge bookend wordmark). Every class below is
+   still driven by the exact same api.js / main.js / booking.js
+   data flow — only the visual layer changed.
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;700;900&family=Dancing+Script:wght@500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
   /* ---- Color tokens ---- */
@@ -23,13 +24,14 @@
   --white-18: rgba(255, 255, 255, 0.18);
   --white-14: rgba(255, 255, 255, 0.14);
   --white-08: rgba(255, 255, 255, 0.08);
+  --white-06: rgba(255, 255, 255, 0.06);
 
   --violet-1: #d3d0ff;   /* light lavender edge of accent gradient */
   --violet-2: #4d3dff;   /* deep blue-violet edge of accent gradient */
   --accent-gradient: linear-gradient(100deg, var(--violet-1) 0%, #8f86ff 45%, var(--violet-2) 100%);
   --accent-glow: rgba(77, 61, 255, 0.45);
 
-  /* legacy alias kept so any un-migrated rule still resolves sanely */
+  /* legacy alias kept so any un-migrated rule (incl. admin.css) still resolves sanely */
   --ink: var(--black);
   --ink-rgb: var(--black-rgb);
   --ink-soft: var(--black-soft);
@@ -46,8 +48,9 @@
   --gold-gradient: var(--accent-gradient);
 
   /* ---- Type ---- */
-  --font-display: 'Bodoni Moda', Georgia, serif;   /* italic accent / script moments */
-  --font-poster: 'Anton', 'Arial Narrow', sans-serif; /* kinetic headlines, mega words */
+  --font-poster: 'Unbounded', 'Arial Narrow', sans-serif;   /* kinetic headlines, logo, mega words */
+  --font-script: 'Dancing Script', cursive;                 /* brush-script accent words, swash caps */
+  --font-display: 'Bodoni Moda', Georgia, serif;            /* italic accent moments (quotes, admin stat) */
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* ---- Layout ---- */
@@ -97,32 +100,51 @@ textarea:focus-visible {
   outline-offset: 3px;
 }
 
-/* Type scale — bold grotesk is the default voice for every heading;
-   an inline <em> switches to the italic serif/accent-gradient treatment. */
+/* Type scale — bold geometric poster font is the default voice for every
+   heading; an inline <em> switches to the script/gradient accent treatment. */
 h1, h2, h3, h4 {
   font-family: var(--font-poster);
-  font-weight: 400;
+  font-weight: 500;
   margin: 0;
   letter-spacing: -0.01em;
   text-transform: none;
 }
 
 .section-heading em,
-.hero-name em,
-.statement-accent {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 500;
+.statement-accent-inline {
+  font-family: var(--font-script);
+  font-style: normal;
+  font-weight: 700;
   background: var(--accent-gradient);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  -webkit-text-fill-color: transparent;
   animation: accent-shimmer 7s ease-in-out infinite;
 }
 @keyframes accent-shimmer {
   0%, 100% { background-position: 0% center; }
   50% { background-position: 100% center; }
+}
+
+.dot { opacity: 0.45; font-size: 0.8em; }
+
+/* Small decorative swash capital — first-letter flourish used sparingly
+   on a couple of headlines, echoing the reference's ornate display caps
+   without depending on its (proprietary) exact typeface. */
+.swash {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.3em;
+  line-height: 0;
+  position: relative;
+  top: 0.09em;
+  margin-right: 0.01em;
+  display: inline-block;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: inherit;
 }
 
 .eyebrow {
@@ -206,6 +228,7 @@ h1, h2, h3, h4 {
   color: var(--black);
 }
 .btn-primary:hover { background: var(--violet-1); transform: translateY(-1px); box-shadow: 0 10px 26px var(--accent-glow); }
+.btn-sm { padding: 0.6em 1.35em; font-size: 0.7rem; }
 
 .btn-outline-light,
 .btn-outline-dark {
@@ -308,7 +331,8 @@ h1, h2, h3, h4 {
 }
 .marquee-track span.word {
   font-family: var(--font-poster);
-  font-size: 1rem;
+  font-weight: 500;
+  font-size: 0.95rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -319,9 +343,10 @@ h1, h2, h3, h4 {
 }
 
 /* =========================================================
-   NAVIGATION — centered logo lockup, plain text links split
-   left/right, no button chrome. Same #navLinks / #navToggle
-   hooks main.js already wires up.
+   NAVIGATION — centered script+poster monogram lockup, plain
+   text links split left/right, no button chrome except the
+   single booking CTA. Same #navLinks / #navToggle hooks
+   main.js already wires up.
    ========================================================= */
 .site-header {
   position: fixed;
@@ -355,41 +380,52 @@ h1, h2, h3, h4 {
 .brand-mobile {
   display: none;
   font-family: var(--font-poster);
+  font-weight: 700;
   font-size: 1.05rem;
   letter-spacing: 0.01em;
   color: var(--white);
 }
 
-/* Centered emblem lockup, desktop */
+/* Centered script+poster emblem lockup, desktop — echoes the reference's
+   centered logo mark sitting above a small tracked wordmark. */
 .brand-desktop {
   position: absolute;
   left: 50%; top: 50%;
   transform: translate(-50%, -50%);
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   line-height: 1;
-  gap: 0.3rem;
+  gap: 0.25rem;
 }
 .brand-mark {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 600;
-  font-size: 1.7rem;
+  font-family: var(--font-poster);
+  font-weight: 700;
+  font-size: 1.5rem;
   color: var(--white);
-  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+}
+.brand-mark .script {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.55em;
+  margin-right: -0.06em;
+  color: var(--white);
 }
 .brand-name {
   font-family: var(--font-poster);
-  font-size: 0.82rem;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  font-size: 0.8rem;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--white);
 }
 .brand-caption {
   font-size: 0.56rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--white-50);
 }
@@ -402,6 +438,7 @@ h1, h2, h3, h4 {
 }
 .nav-group { display: flex; align-items: center; gap: 2.3rem; }
 .nav-links a {
+  font-family: var(--font-body);
   font-size: 0.82rem;
   font-weight: 500;
   letter-spacing: 0.03em;
@@ -420,6 +457,8 @@ h1, h2, h3, h4 {
 }
 .nav-links a:hover::after { width: 100%; }
 .nav-links a:hover { color: var(--white); }
+.nav-links a.btn { text-transform: uppercase; }
+.nav-links a.btn::after { display: none; }
 
 .nav-toggle {
   display: none;
@@ -471,8 +510,9 @@ h1, h2, h3, h4 {
 }
 
 /* =========================================================
-   HERO — stacked kinetic headline over an asymmetric floating
-   photo collage, pure black field (no video / no full-bleed image).
+   HERO — scattered B&W photo collage behind a centered kicker
+   + two-tone headline (clean sans line, then a huge brush-script
+   accent word with an underline), mirroring the reference intro.
    ========================================================= */
 .hero {
   position: relative;
@@ -483,7 +523,7 @@ h1, h2, h3, h4 {
   justify-content: center;
   background: var(--black);
   overflow: hidden;
-  padding: clamp(7rem, 12vw, 9rem) 0 4rem;
+  padding: clamp(7rem, 14vw, 10rem) 0 4rem;
   --mx: 50%;
   --my: 32%;
 }
@@ -503,20 +543,21 @@ h1, h2, h3, h4 {
 .hero-photo {
   position: absolute;
   width: 15vw;
-  max-width: 220px;
-  min-width: 120px;
+  max-width: 230px;
+  min-width: 130px;
   aspect-ratio: 4 / 5;
   object-fit: cover;
   filter: grayscale(1) contrast(1.08);
   opacity: 0;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55);
   animation: hero-photo-in 1s var(--ease) forwards;
 }
 @keyframes hero-photo-in { to { opacity: 1; } }
-.hp-1 { top: 8%;  left: 4%;  animation-delay: .5s; }
-.hp-2 { top: 12%; right: 4%; animation-delay: .65s; z-index: 3; }
-.hp-3 { top: 54%; left: 17%; animation-delay: .8s;  z-index: 3; }
-.hp-4 { top: 50%; right: 12%; animation-delay: .95s; }
-.hp-5 { top: 62%; left: 45%; animation-delay: 1.1s; z-index: 1; }
+.hp-1 { top: 10%; left: 5%;  animation-delay: .5s; }
+.hp-2 { top: 8%;  right: 6%; width: 13vw; max-width: 190px; animation-delay: .65s; z-index: 3; }
+.hp-3 { top: 50%; left: 20%; width: 16vw; max-width: 250px; animation-delay: .8s;  z-index: 3; }
+.hp-4 { top: 46%; right: 15%; animation-delay: .95s; }
+.hp-5 { top: 68%; left: 47%; width: 13vw; max-width: 190px; animation-delay: 1.1s; z-index: 1; }
 
 @media (max-width: 1200px) {
   .hero-photo { width: 17vw; }
@@ -533,52 +574,78 @@ h1, h2, h3, h4 {
   text-align: center;
   color: var(--white);
 }
-.hero-line-1 {
-  font-size: clamp(1rem, 2vw, 1.4rem);
-  font-weight: 400;
-  color: var(--white-88);
-  letter-spacing: 0.01em;
+.hero-kicker {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--white-70);
   margin: 0;
   opacity: 0;
   transform: translateY(10px);
-  animation: hero-rise 0.9s var(--ease) 0.15s forwards;
+  animation: hero-rise-plain 0.9s var(--ease) 0.15s forwards;
 }
-.hero-accent {
+.hero-headline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  margin-top: clamp(0.8rem, 2vw, 1.3rem);
+}
+.hh-line {
+  font-family: var(--font-poster);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3.6vw, 2.6rem);
+  color: var(--white);
+  opacity: 0;
+  transform: translateY(14px);
+  animation: hero-rise-plain 0.9s var(--ease) 0.32s forwards;
+}
+.hh-accent {
   position: relative;
   display: inline-block;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(3.2rem, 10vw, 7.5rem);
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: clamp(4rem, 12.5vw, 9.5rem);
   line-height: 1;
-  margin: 0.15em 0 0;
-  color: var(--white);
-  transform: rotate(-3deg) translateY(10px);
+  margin-top: 0.08em;
+  background: var(--accent-gradient);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
   opacity: 0;
-  animation: hero-rise 0.9s var(--ease) 0.35s forwards;
+  transform: translateY(24px) scale(0.92) rotate(-1.5deg);
+  animation: hero-accent-in 1.1s var(--ease) 0.6s forwards,
+             accent-shimmer 7s ease-in-out infinite 1.7s;
 }
-.hero-accent::after {
+.hh-accent::after {
   content: '';
   position: absolute;
   left: -4%; right: -4%;
-  bottom: 0.32em;
+  bottom: 0.3em;
   height: 1px;
   background: var(--white-35);
-  transform: rotate(-1.4deg);
+  transform: scaleX(0) rotate(-1.2deg);
+  transform-origin: left;
+  animation: hh-underline 0.9s var(--ease) 1.15s forwards;
 }
-@keyframes hero-rise { to { opacity: 1; transform: translateY(0) rotate(-3deg); } }
-.hero-line-1 { animation-name: hero-rise-plain; }
+@keyframes hh-underline { to { transform: scaleX(1) rotate(-1.2deg); } }
+@keyframes hero-accent-in { to { opacity: 1; transform: translateY(0) scale(1) rotate(-1.5deg); } }
 @keyframes hero-rise-plain { to { opacity: 1; transform: translateY(0); } }
 
 .hero-ctas {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2.2rem;
+  gap: 1.4rem;
   flex-wrap: wrap;
   margin-top: clamp(2.4rem, 5vw, 3.6rem);
   opacity: 0;
-  animation: hero-rise-plain 0.9s var(--ease) 0.6s forwards;
+  animation: hero-rise-plain 0.9s var(--ease) 1.3s forwards;
 }
 
 .scroll-cue {
@@ -595,6 +662,8 @@ h1, h2, h3, h4 {
   font-size: 0.68rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  opacity: 0;
+  animation: hero-rise-plain 0.9s var(--ease) 1.6s forwards;
 }
 .scroll-cue .line {
   width: 1px;
@@ -606,10 +675,11 @@ h1, h2, h3, h4 {
 
 /* =========================================================
    STRUCTURAL TYPOGRAPHY — bleeding wordmarks used as section
-   punctuation (signature break, work divider, footer bleed).
+   punctuation (footer bookend).
    ========================================================= */
 .mega-word {
   font-family: var(--font-poster);
+  font-weight: 700;
   text-transform: uppercase;
   line-height: 0.82;
   color: var(--white);
@@ -623,130 +693,150 @@ h1, h2, h3, h4 {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  -webkit-text-fill-color: transparent;
   animation: accent-shimmer 7s ease-in-out infinite;
-}
-
-.signature-break {
-  background: var(--black);
-  overflow: hidden;
-  padding: clamp(2.5rem, 6vw, 4.5rem) 0;
-  text-align: center;
-  border-top: 1px solid var(--white-08);
-}
-.signature-break .mega-word {
-  font-size: clamp(3.5rem, 13vw, 11rem);
-  letter-spacing: -0.01em;
-}
-
-.section-divider-word {
-  overflow: hidden;
-  margin: 0.5rem 0 1.5rem;
-}
-.section-divider-word .mega-word {
-  font-size: clamp(2.8rem, 10vw, 8rem);
-  opacity: 0.1;
 }
 
 .footer-bookend { overflow: hidden; padding-bottom: 0; text-align: center; }
 .footer-bookend .mega-word {
   display: block;
-  font-size: clamp(2rem, 8.6vw, 6.6rem);
+  font-size: clamp(2.2rem, 11vw, 9rem);
+  letter-spacing: -0.02em;
   opacity: 0.95;
 }
-.footer-bookend .mega-word + .mega-word { margin-top: -0.06em; }
+.footer-bookend .mega-word + .mega-word { margin-top: -0.08em; }
 
 /* =========================================================
-   PHILOSOPHY — pinned scroll sequence
+   ABOUT — two-column statement text (scroll-scrubbed by
+   motion.js; fully readable by default with no JS at all),
+   followed by portrait + specialisms, then the stat band.
    ========================================================= */
-.philosophy {
-  background: var(--black);
-  color: var(--white);
-  padding: clamp(4rem, 10vw, 7rem) 0;
-  border-top: 1px solid var(--white-08);
+.about-text-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  margin-top: 1.6rem;
 }
-.philosophy-inner { position: relative; }
-.philo-phrase {
+.about-col {
   font-family: var(--font-poster);
-  font-size: clamp(1.9rem, 4.6vw, 3.5rem);
-  line-height: 1.2;
-  margin: 0 0 0.5rem;
-  max-width: 20ch;
+  font-weight: 400;
+  font-size: clamp(1.1rem, 2.1vw, 1.45rem);
+  line-height: 1.5;
+  color: var(--white-88);
+  margin: 0;
 }
-.philo-phrase em {
-  font-family: var(--font-display);
-  font-style: italic;
+@media (max-width: 860px) {
+  .about-text-grid { grid-template-columns: 1fr; gap: 1.4rem; }
+}
+
+.about-media-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) 1.3fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+  margin-top: clamp(3rem, 7vw, 5.5rem);
+}
+.about-media { position: relative; }
+.about-media img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+  border-radius: var(--radius);
+}
+.about-note { color: var(--white-70); max-width: 52ch; font-size: 1rem; margin: 0; }
+.about-specialisms { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.6rem; }
+.tag-pill {
+  display: inline-flex;
+  padding: 0.5em 1em;
+  border: 1px solid var(--white-18);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white-70);
+}
+@media (max-width: 860px) {
+  .about-media-row { grid-template-columns: 1fr; }
+}
+
+/* Stat band */
+.stat-band { padding: clamp(3rem, 6vw, 4.5rem) 0 0; }
+.stat-band-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 2rem;
+  margin-top: clamp(3rem, 7vw, 5.5rem);
+  padding-top: clamp(2.5rem, 5vw, 3.5rem);
+  border-top: 1px solid var(--white-14);
+}
+.stat-band-item { text-align: left; }
+.stat-band-item .num {
+  display: block;
+  font-family: var(--font-poster);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+  color: var(--white);
+  line-height: 1;
+}
+.stat-band-item .label {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--white-50);
+}
+
+/* =========================================================
+   STATEMENT BAND — "We bring together... nothing short of
+   iconic" style kinetic mid-page line. Pinned + scrubbed by
+   motion.js when GSAP/ScrollTrigger are available; the plain
+   CSS state below is already fully opaque and readable, so a
+   failed CDN load just means it doesn't animate — never that
+   the text is missing.
+   ========================================================= */
+.statement-band {
+  background: var(--black);
+  border-top: 1px solid var(--white-08);
+  min-height: 62vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(4.5rem, 10vw, 7rem) 0;
+  text-align: center;
+}
+.statement-inner { max-width: 920px; margin: 0 auto; }
+.statement-line {
+  font-family: var(--font-poster);
   font-weight: 500;
+  font-size: clamp(1.5rem, 3.8vw, 2.6rem);
+  line-height: 1.3;
+  color: var(--white-88);
+  margin: 0 0 0.15em;
+}
+.statement-accent {
+  display: inline-block;
+  margin-top: 0.3em;
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: clamp(3.6rem, 10.5vw, 7.5rem);
+  line-height: 1;
   background: var(--accent-gradient);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 28px var(--accent-glow));
   animation: accent-shimmer 7s ease-in-out infinite;
 }
-
-.philosophy.js-pinned {
-  height: 100vh;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-.philosophy.js-pinned .philosophy-inner {
-  width: 100%;
-  height: 60vh;
-}
-.philosophy.js-pinned .philo-phrase {
-  position: absolute;
-  margin: 0;
-  opacity: 0;
-}
-.philosophy.js-pinned .philo-phrase[data-pos="1"] { top: 8%;  left: 6%; }
-.philosophy.js-pinned .philo-phrase[data-pos="2"] { top: 42%; left: 52%; text-align: right; }
-.philosophy.js-pinned .philo-phrase[data-pos="3"] { top: 68%; left: 10%; }
-.philosophy.js-pinned .philo-phrase[data-pos="4"] {
-  top: 30%; left: 22%;
-  font-size: clamp(2.4rem, 6vw, 4.6rem);
-  max-width: 16ch;
-}
-
-@media (max-width: 860px) {
-  .philosophy.js-pinned { height: auto; padding: clamp(4rem, 10vw, 7rem) 0; display: block; }
-  .philosophy.js-pinned .philosophy-inner { height: auto; }
-  .philosophy.js-pinned .philo-phrase {
-    position: static; opacity: 1; text-align: left !important;
-    margin: 0 0 0.5rem; max-width: 26ch; font-size: clamp(1.9rem, 4.6vw, 3.5rem) !important;
-  }
-}
+.statement-band.js-pinned { height: 100vh; min-height: 100vh; padding: 0; }
 
 /* =========================================================
-   STATEMENT BAND — "We bring together... nothing short of
-   iconic" style kinetic mid-page line, sits between About
-   and Work.
-   ========================================================= */
-.statement-band {
-  background: var(--black);
-  padding: clamp(4.5rem, 10vw, 8rem) 0;
-  text-align: center;
-  border-top: 1px solid var(--white-08);
-}
-.statement-text {
-  max-width: 22ch;
-  margin: 0 auto;
-  font-family: var(--font-poster);
-  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
-  line-height: 1.25;
-  color: var(--white-88);
-}
-.statement-accent {
-  display: block;
-  font-size: clamp(3.4rem, 9vw, 6.5rem);
-  line-height: 1;
-  margin-top: 0.25em;
-  filter: drop-shadow(0 0 28px var(--accent-glow));
-}
-
-/* =========================================================
-   PORTFOLIO / WORK — organic asymmetric collage grid, with
-   always-on name tags (no hover-reveal), matching the ref.
+   PORTFOLIO / WORK — staggered collage grid with a giant
+   near-transparent wordmark bleeding behind it, always-on
+   outlined name tags bottom-left (no hover-reveal), matching
+   the reference's roster grid.
    ========================================================= */
 .filter-bar {
   display: flex;
@@ -756,6 +846,7 @@ h1, h2, h3, h4 {
 .filter-btn {
   background: none;
   border: none;
+  font-family: var(--font-body);
   color: var(--white-50);
   font-size: 0.78rem;
   font-weight: 600;
@@ -780,12 +871,31 @@ h1, h2, h3, h4 {
 .section--dark .filter-btn,
 .section--porcelain-dim .filter-btn { color: var(--white-50); }
 
+.portfolio-wrap { position: relative; margin-top: clamp(2rem, 5vw, 3rem); }
+.portfolio-bg-word {
+  position: absolute;
+  top: -0.4rem; left: 0; right: 0;
+  text-align: center;
+  font-family: var(--font-poster);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(4.5rem, 15vw, 12rem);
+  line-height: 0.8;
+  color: var(--white);
+  opacity: 0.05;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
 .portfolio-grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-auto-rows: 8vw;
   gap: 1.1rem;
-  margin-top: 2.5rem;
   perspective: 1000px;
 }
 .portfolio-item {
@@ -817,7 +927,7 @@ h1, h2, h3, h4 {
 }
 .portfolio-item:hover img { transform: scale(1.05); filter: grayscale(0.35) contrast(1.05); }
 
-/* organic collage sizing — repeats every 6 items, no data changes needed */
+/* organic collage sizing — repeats every 12 items, no data changes needed */
 .portfolio-grid .portfolio-item:nth-child(12n+1) { grid-column: span 2; grid-row: span 5; }
 .portfolio-grid .portfolio-item:nth-child(12n+2) { grid-column: span 2; grid-row: span 4; margin-top: 8%; }
 .portfolio-grid .portfolio-item:nth-child(12n+3) { grid-column: span 2; grid-row: span 6; }
@@ -865,6 +975,7 @@ h1, h2, h3, h4 {
 }
 
 @media (max-width: 860px) {
+  .portfolio-bg-word { font-size: clamp(3rem, 18vw, 6rem); top: -0.2rem; }
   .portfolio-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 44vw; }
   .portfolio-grid .portfolio-item { grid-column: span 1 !important; grid-row: span 1 !important; margin-top: 0 !important; }
   .portfolio-item.size-wide { grid-column: span 2 !important; }
@@ -927,7 +1038,8 @@ h1, h2, h3, h4 {
 .service-name {
   grid-column: 1;
   font-family: var(--font-poster);
-  font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+  font-weight: 500;
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
   color: var(--white);
 }
 .service-desc {
@@ -946,7 +1058,8 @@ h1, h2, h3, h4 {
 }
 .service-price {
   font-family: var(--font-poster);
-  font-size: 1.1rem;
+  font-weight: 500;
+  font-size: 1.05rem;
   color: var(--white-88);
   white-space: nowrap;
 }
@@ -962,75 +1075,6 @@ h1, h2, h3, h4 {
   .service-row .btn { grid-column: 2; grid-row: 3; margin-top: 0.6rem; }
   .service-meta { grid-column: 2; grid-row: 1 / span 2; align-items: flex-end; }
 }
-
-/* =========================================================
-   ABOUT
-   ========================================================= */
-.about-grid {
-  display: grid;
-  grid-template-columns: minmax(240px, 0.85fr) 1.15fr;
-  gap: clamp(2.5rem, 6vw, 5rem);
-  align-items: center;
-}
-.about-media { position: relative; }
-.about-media img {
-  width: 100%;
-  aspect-ratio: 4/5;
-  object-fit: cover;
-  filter: grayscale(1) contrast(1.05);
-  border-radius: var(--radius);
-}
-.about-media-frame { display: none; }
-.about-copy .section-heading { margin-bottom: 1.2rem; }
-.about-text { color: var(--white-70); max-width: 54ch; }
-.about-text p { margin: 0 0 1.1rem; }
-.about-signature {
-  margin-top: 2rem;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.6rem;
-  color: var(--white);
-}
-
-@media (max-width: 860px) {
-  .about-grid { grid-template-columns: 1fr; }
-}
-
-/* Stat band */
-.stat-band { padding: clamp(3rem, 6vw, 4.5rem) 0 0; }
-.stat-band-inner {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 2rem;
-  padding-top: clamp(2.5rem, 5vw, 3.5rem);
-  border-top: 1px solid var(--white-14);
-}
-.stat-band-item { text-align: left; }
-.stat-band-item .num {
-  display: block;
-  font-family: var(--font-poster);
-  font-size: clamp(2.4rem, 5vw, 4rem);
-  color: var(--white);
-  line-height: 1;
-}
-.stat-band-item .label {
-  display: block;
-  margin-top: 0.5rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--white-50);
-}
-.tag-pill {
-  display: inline-flex;
-  padding: 0.5em 1em;
-  border: 1px solid var(--white-18);
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--white-70);
-}
-.about-specialisms { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.6rem; }
 
 /* =========================================================
    TESTIMONIALS
@@ -1099,8 +1143,9 @@ h1, h2, h3, h4 {
 .cta-band-actions { display: flex; justify-content: center; gap: 1.6rem; flex-wrap: wrap; }
 
 /* =========================================================
-   NEWSLETTER BAND — front-end only unless wired to a real
-   subscribe endpoint; matches the reference's closing module.
+   NEWSLETTER BAND — closing module, matches the reference's
+   "Subscribe to our Newsletter" (with a couple of swash-cap
+   letters echoing its ornate display caps).
    ========================================================= */
 .newsletter-band {
   background: var(--black);
@@ -1108,7 +1153,11 @@ h1, h2, h3, h4 {
   text-align: center;
   border-top: 1px solid var(--white-08);
 }
-.newsletter-band .section-heading { max-width: 16ch; margin: 0 auto 2.4rem; }
+.newsletter-heading {
+  max-width: 18ch;
+  margin: 0.6rem auto 2.4rem;
+  font-weight: 500;
+}
 .newsletter-form {
   max-width: 560px;
   margin: 0 auto;
@@ -1129,6 +1178,7 @@ h1, h2, h3, h4 {
   font-family: var(--font-body);
   font-size: 0.95rem;
   padding: 0.9rem 0;
+  min-width: 0;
 }
 .newsletter-form input::placeholder { color: var(--white-35); }
 .newsletter-form input:focus { outline: none; }
@@ -1140,6 +1190,7 @@ h1, h2, h3, h4 {
   color: var(--black);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  font-size: 1.1rem;
   transition: background 0.3s var(--ease), transform 0.3s var(--ease);
 }
 .newsletter-form button:hover { background: var(--violet-1); transform: translateX(2px); }
@@ -1185,22 +1236,25 @@ h1, h2, h3, h4 {
 .hours-table tr:last-child { border-bottom: 1px solid var(--white-14); }
 .hours-table td { padding: 0.85rem 0; font-size: 0.88rem; color: var(--white-70); }
 .hours-table td:last-child { text-align: right; color: var(--white); }
+.hours-table tr.is-today td { color: var(--white); font-weight: 600; }
 .contact-map { position: relative; border: 1px solid var(--white-14); overflow: hidden; min-height: 320px; }
 .contact-map iframe { width: 100%; height: 100%; min-height: 320px; border: 0; filter: grayscale(1) invert(0.92) contrast(0.9); }
 @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; } }
 
 /* =========================================================
-   FOOTER
+   FOOTER — link columns + back-to-top, bookend by a huge
+   two-line wordmark bleeding to the viewport edges.
    ========================================================= */
 .site-footer { background: var(--black); border-top: 1px solid var(--white-14); padding-top: clamp(3rem, 6vw, 4.5rem); }
 .footer-top {
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 3rem;
+  grid-template-columns: 1.6fr repeat(3, auto);
+  gap: clamp(2rem, 5vw, 3.5rem);
   padding-bottom: clamp(2.5rem, 5vw, 3.5rem);
   border-bottom: 1px solid var(--white-08);
 }
-.footer-brand .brand-name { font-size: 1rem; }
+.footer-brand-mark { display: inline-flex; align-items: baseline; gap: 0.55rem; }
+.footer-brand-mark .brand-name { font-size: 1rem; }
 .footer-tagline { margin-top: 0.8rem; color: var(--white-50); font-size: 0.85rem; max-width: 32ch; }
 .footer-nav { display: flex; flex-direction: column; gap: 0.75rem; }
 .footer-nav a { font-size: 0.85rem; color: var(--white-70); }
@@ -1211,6 +1265,7 @@ h1, h2, h3, h4 {
   width: 40px; height: 40px; border-radius: 50%;
   border: 1px solid var(--white-18);
   display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
   transition: all 0.3s var(--ease);
 }
 .footer-social a:hover { border-color: var(--white); background: var(--white); color: var(--black); }
@@ -1227,11 +1282,12 @@ h1, h2, h3, h4 {
 }
 .back-to-top { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--white-70); }
 .back-to-top:hover { color: var(--white); }
-.footer-credit a { color: var(--white-50); }
-.footer-credit a:hover { color: var(--white); }
 
-@media (max-width: 700px) {
-  .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+@media (max-width: 900px) {
+  .footer-top { grid-template-columns: 1fr 1fr; row-gap: 2.5rem; }
+}
+@media (max-width: 560px) {
+  .footer-top { grid-template-columns: 1fr; }
 }
 
 /* =========================================================
@@ -1269,9 +1325,13 @@ h1, h2, h3, h4 {
 .simple-header .nav-inner { justify-content: space-between; }
 .simple-header .brand {
   font-family: var(--font-poster);
+  font-weight: 700;
   font-size: 1rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--white);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
 }
 .simple-header .back-link {
   font-size: 0.8rem;
@@ -1367,7 +1427,7 @@ h1, h2, h3, h4 {
 }
 .service-pick:hover { border-color: var(--white-50); }
 .service-pick.is-selected { border-color: var(--violet-1); background: rgba(77, 61, 255, 0.12); }
-.service-pick .name { font-family: var(--font-poster); font-size: 1rem; color: var(--white); }
+.service-pick .name { font-family: var(--font-poster); font-weight: 500; font-size: 1rem; color: var(--white); }
 .service-pick .meta { font-size: 0.76rem; color: var(--white-50); margin-top: 0.3rem; }
 
 .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-top: 0.5rem; }
@@ -1430,31 +1490,31 @@ h1, h2, h3, h4 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.6rem;
+  gap: 1.8rem;
   transition: opacity 0.7s var(--ease), visibility 0.7s;
 }
 .preloader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .preloader-marks {
   display: flex;
   align-items: baseline;
-  gap: 0.6rem;
+  gap: 0.35rem;
   line-height: 1;
 }
 .preloader-marks .pl-mark {
   font-family: var(--font-poster);
-  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 700;
+  font-size: clamp(4rem, 17vw, 9.5rem);
   color: var(--white);
   opacity: 0;
-  transform: translateY(24px) scale(0.85);
-  animation: pl-mark-in 0.8s var(--ease) forwards;
+  transform: translateY(40px) scale(0.7);
+  animation: pl-mark-in 0.9s var(--ease) forwards;
 }
 .preloader-marks .pl-mark-a {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 600;
+  font-family: var(--font-script);
+  font-weight: 700;
   animation-delay: 0.05s;
 }
-.preloader-marks .pl-mark-s { animation-delay: 0.22s; }
+.preloader-marks .pl-mark-s { animation-delay: 0.28s; }
 @keyframes pl-mark-in { to { opacity: 1; transform: translateY(0) scale(1); } }
 .preloader-mark {
   font-family: var(--font-body);
@@ -1464,7 +1524,7 @@ h1, h2, h3, h4 {
   text-transform: uppercase;
   color: var(--white-50);
   opacity: 0;
-  animation: pl-mark-in 0.8s var(--ease) 0.5s forwards;
+  animation: pl-mark-in 0.8s var(--ease) 0.55s forwards;
 }
 .preloader-bar {
   width: 160px;
