@@ -5,8 +5,8 @@
  * booking.js, and api.js work completely independently of this file.
  * If GSAP/Lenis fail to load from the CDN, or prefers-reduced-motion is
  * set, or this whole file 404s, the site still renders and functions —
- * it just won't have the extra motion. Every block below checks its own
- * dependency before touching the DOM.
+ * the hero, headings, and statement band are all fully opaque/readable
+ * in plain CSS already; this file only adds movement on top of that.
  */
 (function () {
   'use strict';
@@ -69,97 +69,94 @@
   }
 
   /* ================================================================
-     HERO — cursor-reactive gold spotlight + video background wiring
+     HERO — cursor-reactive violet spotlight behind the photo collage.
+     Everything else in the hero (kicker, headline, script accent,
+     CTAs) is a pure CSS on-load animation — see style.css — so it
+     always plays even if every script on this page fails.
   ================================================================ */
   const hero = document.querySelector('.hero');
-  if (hero) {
-    if (hasFinePointer && !reduceMotion) {
-      hero.addEventListener('mousemove', (e) => {
-        const rect = hero.getBoundingClientRect();
-        const px = ((e.clientX - rect.left) / rect.width) * 100;
-        const py = ((e.clientY - rect.top) / rect.height) * 100;
-        hero.style.setProperty('--mx', px + '%');
-        hero.style.setProperty('--my', py + '%');
-      });
-    }
-
-    // Video background: only activates if assets/hero-reel.mp4 actually
-    // exists. Until then the poster <img> (with its Ken Burns animation
-    // from style.css) is what visitors see — this just wires the plug
-    // in so dropping a real file in later needs zero code changes.
-    const heroMedia = document.querySelector('.hero-media');
-    const heroVideo = document.getElementById('heroVideo');
-    if (heroMedia && heroVideo) {
-      heroVideo.addEventListener('canplay', () => heroVideo.classList.add('is-ready'));
-      heroVideo.addEventListener('error', () => heroVideo.remove());
-      // If it hasn't fired canplay/error shortly (e.g. no <source> resolves),
-      // just remove it rather than leaving a dead element in the DOM.
-      setTimeout(() => {
-        if (heroVideo.isConnected && heroVideo.readyState === 0) heroVideo.remove();
-      }, 2500);
-    }
+  if (hero && hasFinePointer && !reduceMotion) {
+    hero.addEventListener('mousemove', (e) => {
+      const rect = hero.getBoundingClientRect();
+      const px = ((e.clientX - rect.left) / rect.width) * 100;
+      const py = ((e.clientY - rect.top) / rect.height) * 100;
+      hero.style.setProperty('--mx', px + '%');
+      hero.style.setProperty('--my', py + '%');
+    });
   }
 
   /* ================================================================
-     PHILOSOPHY — pinned scroll sequence (desktop only). Default CSS
-     already renders this as a normal readable stack of paragraphs;
-     the .js-pinned class is only added here, after GSAP + ScrollTrigger
-     are confirmed present, so a failed CDN load just leaves the plain,
-     fully-readable version in place.
+     ABOUT — two-column statement scrubs word-by-word as the section
+     scrolls through view (not pinned; it just scrolls normally).
+     Default CSS already renders full-opacity, fully readable text,
+     so this only layers a dim -> bright wipe on top of content that
+     was never actually hidden.
+  ================================================================ */
+  if (hasGSAP && hasScrollTrigger && hasSplitText && !reduceMotion) {
+    document.querySelectorAll('.about-col').forEach((col) => {
+      const split = new SplitText(col, { type: 'words', wordsClass: 'gs-word' });
+      gsap.set(split.words, { opacity: 0.16 });
+      gsap.to(split.words, {
+        opacity: 1,
+        stagger: 0.04,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: col,
+          start: 'top 85%',
+          end: 'bottom 55%',
+          scrub: 0.4,
+        },
+      });
+    });
+  }
+
+  /* ================================================================
+     STATEMENT BAND — pinned scroll-scrub kinetic line, desktop only
+     ("Every appointment is a collaboration... flawless"). Default
+     CSS already renders this fully opaque and readable; the dim
+     starting state is only ever applied here, after GSAP +
+     ScrollTrigger are confirmed present — a failed CDN load just
+     leaves the plain, fully-readable version in place, unpinned.
   ================================================================ */
   if (hasGSAP && hasScrollTrigger && !reduceMotion && window.innerWidth > 860) {
-    const philo = document.getElementById('philosophySection');
-    if (philo) {
-      philo.classList.add('js-pinned');
-      const phrases = philo.querySelectorAll('.philo-phrase');
+    const statement = document.getElementById('statementSection');
+    if (statement) {
+      statement.classList.add('js-pinned');
+      const lines = statement.querySelectorAll('.statement-line, .statement-accent');
+      gsap.set(lines, { opacity: 0.14 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: philo,
+          trigger: statement,
           start: 'top top',
-          end: '+=220%',
+          end: '+=160%',
           scrub: 0.6,
           pin: true,
         },
       });
 
-      phrases.forEach((phrase, i) => {
-        tl.to(phrase, { opacity: 1, duration: 0.6 }, i * 0.9)
-          .to(phrase, { opacity: 1, duration: 0.5 }, i * 0.9 + 0.6)
-          .to(phrase, { opacity: 0, duration: 0.5 }, i * 0.9 + 1.1);
+      lines.forEach((line, i) => {
+        tl.to(line, { opacity: 1, duration: 0.6 }, i * 0.8);
       });
-      // keep the final phrase visible through the end of the pin
-      tl.to(phrases[phrases.length - 1], { opacity: 1 }, tl.duration() - 0.5);
+      tl.to({}, { duration: 0.4 }); // brief hold at full brightness before the pin releases
     }
   }
 
   /* ================================================================
-     KINETIC HEADINGS — split + stagger reveal, GSAP + SplitText only
+     KINETIC HEADINGS — every section heading splits into words and
+     reveals as it scrolls into view. GSAP + SplitText + ScrollTrigger
+     only; plain CSS already shows headings normally otherwise.
   ================================================================ */
-  if (hasGSAP && hasSplitText && !reduceMotion) {
-    // Hero name: reveal once, on load, no scroll trigger needed (above the fold)
-    const heroName = document.querySelector('.hero-name');
-    if (heroName) {
-      const split = new SplitText(heroName, { type: 'chars', charsClass: 'gs-char' });
-      gsap.set(split.chars, { yPercent: 120, opacity: 0 });
-      gsap.to(split.chars, {
+  if (hasGSAP && hasSplitText && hasScrollTrigger && !reduceMotion) {
+    document.querySelectorAll('.section-heading').forEach((el) => {
+      const split = new SplitText(el, { type: 'words', wordsClass: 'gs-word' });
+      gsap.set(split.words, { yPercent: 100, opacity: 0 });
+      gsap.to(split.words, {
         yPercent: 0, opacity: 1,
-        duration: 0.9, ease: 'power4.out', stagger: 0.03, delay: 0.5,
+        duration: 0.8, ease: 'power3.out', stagger: 0.05,
+        scrollTrigger: { trigger: el, start: 'top 85%' },
       });
-    }
-
-    // Every other section heading: split + reveal when scrolled into view
-    if (hasScrollTrigger) {
-      document.querySelectorAll('.section-heading').forEach((el) => {
-        const split = new SplitText(el, { type: 'words', wordsClass: 'gs-word' });
-        gsap.set(split.words, { yPercent: 100, opacity: 0 });
-        gsap.to(split.words, {
-          yPercent: 0, opacity: 1,
-          duration: 0.8, ease: 'power3.out', stagger: 0.05,
-          scrollTrigger: { trigger: el, start: 'top 85%' },
-        });
-      });
-    }
+    });
   }
 
   /* ================================================================

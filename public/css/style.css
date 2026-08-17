@@ -973,6 +973,7 @@ h1, h2, h3, h4 {
   margin: 0 0 0.15em;
 }
 .statement-accent {
+  padding: 20px;
   display: inline-block;
   margin-top: 0.3em;
   font-family: var(--font-script);
