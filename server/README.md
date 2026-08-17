@@ -1,4 +1,4 @@
-# Amit Sharma — Makeup Artist & Hairstylist
+# Maya Ellison — Makeup Artist & Hairstylist
 
 Single-repo site: static frontend (HTML/CSS/vanilla JS) served by one Express app,
 backed by MongoDB via Mongoose. No React, no separate backend service, no browser
@@ -78,8 +78,8 @@ npm start
 ```
 
 Then open:
-- `http://localhost:3000` — public site
-- `http://localhost:3000/admin/login.html` — owner dashboard login
+- `http://localhost:4000` — public site
+- `http://localhost:4000/admin/login.html` — owner dashboard login
 
 ## API quick reference
 
@@ -131,6 +131,10 @@ DELETE /api/blocked-dates/:id   owner
 GET    /api/dashboard/overview  owner
 
 POST   /api/upload              owner   (multipart, field name "image" — saves to public/assets/uploads)
+
+POST   /api/reset-content       owner   (irreversible — wipes Profile/Service/Portfolio/Testimonial/
+                                          Availability/BlockedDate only. Never touches User, Booking,
+                                          or Inquiry. Requires body { "confirm": "RESET_CONTENT" })
 ```
 
 ## Double-booking protection
