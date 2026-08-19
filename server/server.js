@@ -24,6 +24,7 @@ const blockedDateRoutes = require('./routes/blockedDates');
 const dashboardRoutes = require('./routes/dashboard');
 const uploadRoutes = require('./routes/upload');
 const resetRoutes = require('./routes/reset');
+const newsletterRoutes = require('./routes/newsletter');
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use('/api/blocked-dates', blockedDateRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/reset-content', resetRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

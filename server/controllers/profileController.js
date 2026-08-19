@@ -25,9 +25,10 @@ async function getProfile(req, res) {
 async function updateProfile(req, res) {
   const profile = await getOrCreateProfile();
   const editableFields = [
-    'name', 'title', 'tagline', 'bio', 'profileImage',
+    'name', 'title', 'tagline', 'bio', 'profileImage', 'heroImages',
     'phone', 'whatsapp', 'email', 'address', 'city',
     'mapsUrl', 'instagramUrl', 'facebookUrl', 'businessHours',
+    'showPrices', 'accentColor',
   ];
   editableFields.forEach((field) => {
     if (req.body[field] !== undefined) profile[field] = req.body[field];

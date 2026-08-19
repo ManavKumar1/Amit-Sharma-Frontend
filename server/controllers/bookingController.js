@@ -1,19 +1,33 @@
 const Booking = require('../models/Booking');
 const Service = require('../models/Service');
+const Inquiry = require('../models/Inquiry');
 const checkSlotAvailable = require('../utils/checkSlotAvailable');
 
 // Public: just the taken start times for one date, no customer details —
-// used by book.html to gray out slots that are already spoken for.
+// used by book.html to gray out slots that are already spoken for. Includes
+// both confirmed/pending bookings AND still-open inquiries, since an
+// unresolved inquiry holds the slot until the owner acts on it.
 async function getBookedSlotsForDate(req, res) {
   const { date } = req.query;
   if (!date) return res.status(400).json({ error: 'date query param is required.' });
 
-  const rows = await Booking.find({
-    bookingDate: date,
-    status: { $in: ['pending', 'confirmed'] },
-  }).select('startTime -_id');
+  const [bookingRows, inquiryRows] = await Promise.all([
+    Booking.find({
+      bookingDate: date,
+      status: { $in: ['pending', 'confirmed'] },
+    }).select('startTime -_id'),
+    Inquiry.find({
+      preferredDate: date,
+      status: { $in: ['new', 'contacted'] },
+    }).select('preferredTime -_id'),
+  ]);
 
-  res.json(rows.map((r) => r.startTime));
+  const takenSlots = new Set([
+    ...bookingRows.map((r) => r.startTime),
+    ...inquiryRows.map((r) => r.preferredTime),
+  ]);
+
+  res.json(Array.from(takenSlots));
 }
 
 async function listBookings(req, res) {

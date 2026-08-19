@@ -12,6 +12,13 @@ async function createInquiry(req, res) {
     return res.status(400).json({ error: 'That service is not available.' });
   }
 
+  // Same guard used for real bookings — an unresolved inquiry holds the
+  // slot too, so a second person can't submit for the same date/time.
+  const availability = await checkSlotAvailable(preferredDate, preferredTime);
+  if (!availability.ok) {
+    return res.status(409).json({ error: availability.reason });
+  }
+
   const inquiry = await Inquiry.create({
     customerName,
     phone,
@@ -77,7 +84,7 @@ async function convertInquiry(req, res) {
   const date = bookingDate || inquiry.preferredDate;
   const start = startTime || inquiry.preferredTime;
 
-  const availability = await checkSlotAvailable(date, start);
+  const availability = await checkSlotAvailable(date, start, null, inquiry._id);
   if (!availability.ok) {
     return res.status(409).json({ error: availability.reason });
   }
