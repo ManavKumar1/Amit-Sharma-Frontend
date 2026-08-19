@@ -32,7 +32,7 @@
     try {
       await api('/auth/logout', { method: 'POST' });
     } finally {
-      window.location.href = 'login.html';
+      window.location.href = '../index.html';
     }
   });
 
@@ -59,6 +59,7 @@
     services: loadServices,
     portfolio: () => loadPortfolioAdmin('all'),
     testimonials: loadTestimonials,
+    newsletter: loadNewsletter,
     availability: loadAvailabilitySection,
     settings: loadSettings,
   };
@@ -80,9 +81,27 @@
   window.addEventListener('hashchange', () => showSection(currentSection()));
   showSection(currentSection());
 
-  /* ---------------- PROFILE (for WhatsApp message template) ---------------- */
+  /* ---------------- PROFILE (for WhatsApp message template, currency, theme accent) ---------------- */
   let artistName = 'Amit';
-  api('/profile').then((p) => { if (p && p.name) artistName = p.name.split(' ')[0]; }).catch(() => {});
+  api('/profile').then((p) => {
+    if (!p) return;
+    if (p.name) artistName = p.name.split(' ')[0];
+    // Dashboard chrome uses the same owner-chosen pop color as the public
+    // site, applied only when the dashboard itself is in light theme.
+    document.documentElement.dataset.accent = p.accentColor || 'violet';
+  }).catch(() => {});
+
+  const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', EUR: '€', GBP: '£' };
+  function currencySymbol(code) {
+    return CURRENCY_SYMBOLS[code] || (code ? code + ' ' : '₹');
+  }
+
+  /* ---------------- THEME TOGGLE ---------------- */
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch (err) { /* private mode etc — non-fatal */ }
+  });
 
   function waLink(phone, message) {
     const digits = String(phone || '').replace(/[^\d]/g, '');
@@ -123,6 +142,56 @@
     return new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, {
       weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
     });
+  }
+
+  /* ---------------- IMAGE FIELD (upload OR paste a URL) ----------------
+     Reused by Portfolio, Testimonials, and Settings so every image field
+     in the dashboard lets the owner either upload a file or just paste a
+     link (e.g. a picsum URL) — not one or the other. */
+  function imageFieldHTML(id, currentUrl, label) {
+    const safeUrl = currentUrl || '';
+    return `
+      <div class="form-group image-field">
+        <label>${label}</label>
+        <img class="image-field-preview" id="${id}_preview" src="${safeUrl}" alt="" style="${safeUrl ? '' : 'display:none;'}">
+        <div class="image-field-row">
+          <input type="url" id="${id}_url" placeholder="Paste an image URL" value="${safeUrl}">
+          <label class="image-field-upload-btn" for="${id}_file">Upload</label>
+          <input type="file" id="${id}_file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+        </div>
+        <p class="field-hint">Paste a link, or upload a file — uploading a file overrides the URL.</p>
+      </div>`;
+  }
+  function wireImageField(id) {
+    const fileInput = document.getElementById(`${id}_file`);
+    const urlInput = document.getElementById(`${id}_url`);
+    const preview = document.getElementById(`${id}_preview`);
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
+    });
+    urlInput.addEventListener('input', () => {
+      if (fileInput.files[0]) return; // an already-chosen file takes visual priority
+      preview.src = urlInput.value;
+      preview.style.display = urlInput.value ? 'block' : 'none';
+    });
+  }
+  async function resolveImageField(id, existingUrl) {
+    const fileInput = document.getElementById(`${id}_file`);
+    const urlInput = document.getElementById(`${id}_url`);
+    const file = fileInput.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: formData });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Image upload failed.');
+      return data.url;
+    }
+    const url = urlInput.value.trim();
+    return url || existingUrl || '';
   }
 
   /* ================================================================
@@ -237,7 +306,7 @@
           <button class="modal-close" id="modalClose">&times;</button>
         </div>
 
-        <div class="modal-section"><div class="k">Service</div>${b.serviceNameSnapshot} — $${b.priceSnapshot}</div>
+        <div class="modal-section"><div class="k">Service</div>${b.serviceNameSnapshot} — ${currencySymbol(servicesById[b.serviceId]?.currency)}${b.priceSnapshot}</div>
         <div class="modal-section"><div class="k">Date &amp; Time</div>${formatDatePretty(b.bookingDate)} at ${b.startTime}</div>
         <div class="modal-section"><div class="k">Contact</div>${b.phone}<br>${b.email}</div>
         ${b.customerNotes ? `<div class="modal-section"><div class="k">Customer Notes</div>${b.customerNotes}</div>` : ''}
@@ -504,7 +573,7 @@
         <tr>
           <td data-label="Name">${s.name}</td>
           <td data-label="Category">${s.category}</td>
-          <td data-label="Price">$${s.price}</td>
+          <td data-label="Price">${currencySymbol(s.currency)}${s.price}</td>
           <td data-label="Duration">${s.duration} min</td>
           <td data-label="Active">${s.isActive ? '<span class="badge badge-confirmed">Active</span>' : '<span class="badge badge-cancelled">Disabled</span>'}</td>
           <td data-label=""><button class="btn btn-outline-dark" data-edit="${s._id}" style="padding:0.4em 1em;font-size:0.75rem;">Edit</button></td>
@@ -525,7 +594,16 @@
       { name: 'name', label: 'Name', value: service?.name },
       { name: 'description', label: 'Description', type: 'textarea', value: service?.description },
       { name: 'category', label: 'Category', value: service?.category || 'General' },
-      { name: 'price', label: 'Price (USD)', type: 'number', value: service?.price },
+      { name: 'price', label: 'Price', type: 'number', value: service?.price },
+      {
+        name: 'currency', label: 'Currency', type: 'select', value: service?.currency || 'INR',
+        options: [
+          { value: 'INR', label: 'INR (₹)' },
+          { value: 'USD', label: 'USD ($)' },
+          { value: 'EUR', label: 'EUR (€)' },
+          { value: 'GBP', label: 'GBP (£)' },
+        ],
+      },
       { name: 'duration', label: 'Duration (minutes)', type: 'number', value: service?.duration },
       { name: 'sortOrder', label: 'Display Order', type: 'number', value: service?.sortOrder ?? 0 },
       { name: 'isActive', label: 'Active (visible on public site)', type: 'checkbox', value: service ? service.isActive : true },
@@ -600,12 +678,7 @@
     renderModal(`
       <div class="modal-head"><h2 style="font-size:1.3rem;">${item ? 'Edit Image' : 'Add Image'}</h2><button class="modal-close" id="modalClose">&times;</button></div>
       <form id="portfolioForm">
-        <div class="form-group">
-          <label for="pfImage">Image</label>
-          <img id="pfPreview" src="${item ? item.imageUrl : ''}" alt="" style="width:100%;border-radius:var(--radius);margin-bottom:0.6rem;${item ? '' : 'display:none;'}">
-          <input type="file" id="pfImage" accept="image/jpeg,image/png,image/webp,image/gif">
-          <p style="font-size:0.76rem;color:var(--ink-70);margin-top:0.4rem;">${item ? 'Leave blank to keep the current image.' : 'JPG, PNG, WEBP, or GIF — up to 8MB.'}</p>
-        </div>
+        ${imageFieldHTML('pfImg', item?.imageUrl, 'Image')}
         <div class="form-group"><label for="pfTitle">Title</label><input type="text" id="pfTitle" value="${item?.title || ''}"></div>
         <div class="form-group"><label for="pfCaption">Caption</label><input type="text" id="pfCaption" value="${item?.caption || ''}"></div>
         <div class="form-group">
@@ -631,13 +704,7 @@
       </form>
     `);
 
-    document.getElementById('pfImage').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const preview = document.getElementById('pfPreview');
-      preview.src = URL.createObjectURL(file);
-      preview.style.display = 'block';
-    });
+    wireImageField('pfImg');
 
     document.getElementById('portfolioForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -646,17 +713,8 @@
       submitBtn.textContent = 'Saving…';
 
       try {
-        let imageUrl = item ? item.imageUrl : null;
-        const file = document.getElementById('pfImage').files[0];
-        if (file) {
-          const formData = new FormData();
-          formData.append('image', file);
-          const res = await fetch('/api/upload', { method: 'POST', credentials: 'include', body: formData });
-          const uploadData = await res.json();
-          if (!res.ok) throw new Error(uploadData.error || 'Upload failed.');
-          imageUrl = uploadData.url;
-        }
-        if (!imageUrl) throw new Error('Please choose an image.');
+        const imageUrl = await resolveImageField('pfImg', item?.imageUrl);
+        if (!imageUrl) throw new Error('Please add an image — upload a file or paste a URL.');
 
         const payload = {
           imageUrl,
@@ -731,35 +789,118 @@
   document.getElementById('addTestimonialBtn').addEventListener('click', () => openTestimonialModal(null));
 
   function openTestimonialModal(t) {
-    const fields = [
-      { name: 'clientName', label: 'Client Name', value: t?.clientName },
-      { name: 'review', label: 'Review', type: 'textarea', value: t?.review },
-      { name: 'rating', label: 'Rating', type: 'select', value: t?.rating || 5, options: [5, 4, 3, 2, 1].map((n) => ({ value: n, label: `${n} stars` })) },
-      { name: 'service', label: 'Service / Occasion', value: t?.service },
-      { name: 'imageUrl', label: 'Photo URL (optional)', value: t?.imageUrl },
-      { name: 'isActive', label: 'Active (visible on public site)', type: 'checkbox', value: t ? t.isActive : true },
-    ];
+    renderModal(`
+      <div class="modal-head"><h2 style="font-size:1.3rem;">${t ? 'Edit Review' : 'Add Review'}</h2><button class="modal-close" id="modalClose">&times;</button></div>
+      <form id="testimonialForm">
+        <div class="form-group"><label for="tClientName">Client Name</label><input type="text" id="tClientName" value="${t?.clientName || ''}"></div>
+        <div class="form-group"><label for="tReview">Review</label><textarea id="tReview" rows="3">${t?.review || ''}</textarea></div>
+        <div class="form-group">
+          <label for="tRating">Rating</label>
+          <select id="tRating">${[5, 4, 3, 2, 1].map((n) => `<option value="${n}" ${(t?.rating || 5) === n ? 'selected' : ''}>${n} stars</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label for="tService">Service / Occasion</label><input type="text" id="tService" value="${t?.service || ''}"></div>
+        ${imageFieldHTML('tImg', t?.imageUrl, 'Client Photo (optional)')}
+        <div class="form-group" style="display:flex;align-items:center;gap:0.6rem;">
+          <input type="checkbox" id="tActive" ${t ? (t.isActive ? 'checked' : '') : 'checked'} style="width:auto;">
+          <label for="tActive" style="margin:0;text-transform:none;font-weight:500;">Active (visible on public site)</label>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary" id="tSubmit">Save</button>
+          ${t ? '<button type="button" class="btn btn-outline-dark" id="tDelete">Delete</button>' : ''}
+        </div>
+      </form>
+    `);
 
-    openFormModal({
-      title: t ? 'Edit Review' : 'Add Review',
-      fields,
-      onSubmit: async (values) => {
+    wireImageField('tImg');
+
+    document.getElementById('testimonialForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('tSubmit');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving…';
+
+      try {
+        const imageUrl = await resolveImageField('tImg', t?.imageUrl);
+        const payload = {
+          clientName: document.getElementById('tClientName').value,
+          review: document.getElementById('tReview').value,
+          rating: Number(document.getElementById('tRating').value),
+          service: document.getElementById('tService').value,
+          imageUrl,
+          isActive: document.getElementById('tActive').checked,
+        };
+
         if (t) {
-          await api(`/testimonials/${t._id}`, { method: 'PUT', body: JSON.stringify(values) });
+          await api(`/testimonials/${t._id}`, { method: 'PUT', body: JSON.stringify(payload) });
           toast('Review updated.');
         } else {
-          await api('/testimonials', { method: 'POST', body: JSON.stringify(values) });
+          await api('/testimonials', { method: 'POST', body: JSON.stringify(payload) });
           toast('Review added.');
         }
+        closeModal();
         loadTestimonials();
-      },
-      onDelete: t ? async () => {
-        await api(`/testimonials/${t._id}`, { method: 'DELETE' });
-        toast('Review removed.');
-        loadTestimonials();
-      } : null,
+      } catch (err) {
+        toast(err.message, true);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save';
+      }
     });
+
+    const deleteBtn = document.getElementById('tDelete');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        if (!confirm('Delete this review? This cannot be undone.')) return;
+        try {
+          await api(`/testimonials/${t._id}`, { method: 'DELETE' });
+          toast('Review removed.');
+          closeModal();
+          loadTestimonials();
+        } catch (err) {
+          toast(err.message, true);
+        }
+      });
+    }
   }
+
+  /* ================================================================
+     NEWSLETTER
+  ================================================================ */
+  let newsletterEmails = [];
+
+  async function loadNewsletter() {
+    const tbody = document.querySelector('#newsletterTable tbody');
+    tbody.innerHTML = '<tr><td colspan="2"><div class="skeleton-row"></div></td></tr>';
+    try {
+      const list = await api('/newsletter');
+      document.getElementById('newsletterCount').textContent = list.length;
+      newsletterEmails = list.map((n) => n.email);
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="2"><div class="empty-state">No subscribers yet.</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map((n) => `
+        <tr>
+          <td data-label="Email">${n.email}</td>
+          <td data-label="Subscribed">${formatDatePretty(n.createdAt.split('T')[0])}</td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="2"><div class="empty-state">${err.message}</div></td></tr>`;
+    }
+  }
+
+  document.getElementById('copyNewsletterBtn').addEventListener('click', async () => {
+    if (!newsletterEmails.length) {
+      toast('No emails to copy yet.', true);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(newsletterEmails.join('\n'));
+      toast(`Copied ${newsletterEmails.length} email${newsletterEmails.length === 1 ? '' : 's'} to clipboard.`);
+    } catch (err) {
+      toast('Could not copy automatically — please select and copy manually.', true);
+    }
+  });
 
   /* ================================================================
      AVAILABILITY + BLOCKED DATES
@@ -865,6 +1006,7 @@
     container.innerHTML = '<div class="skeleton-row"></div>';
     try {
       const p = await api('/profile');
+      const heroImages = p.heroImages || [];
       container.innerHTML = `
         <form id="settingsFormEl">
           <div class="panel-head"><h2>Artist</h2></div>
@@ -887,17 +1029,53 @@
 
           <div class="panel-head" style="margin-top:1.5rem;"><h2>Social</h2></div>
           <div class="form-row">
-            <div class="form-group"><label for="stInstagram">Instagram URL</label><input type="text" id="stInstagram" value="${p.instagramUrl || ''}"></div>
-            <div class="form-group"><label for="stFacebook">Facebook URL</label><input type="text" id="stFacebook" value="${p.facebookUrl || ''}"></div>
+            <div class="form-group"><label for="stInstagram">Instagram URL</label><input type="text" id="stInstagram" value="${p.instagramUrl || ''}" placeholder="Leave blank to hide the icon"></div>
+            <div class="form-group"><label for="stFacebook">Facebook URL</label><input type="text" id="stFacebook" value="${p.facebookUrl || ''}" placeholder="Leave blank to hide the icon"></div>
           </div>
 
-          <button type="submit" class="btn btn-primary">Save Settings</button>
+          <div class="panel-head" style="margin-top:1.5rem;"><h2>Pricing</h2></div>
+          <div class="form-group" style="display:flex;align-items:center;gap:0.6rem;">
+            <input type="checkbox" id="stShowPrices" ${p.showPrices !== false ? 'checked' : ''} style="width:auto;">
+            <label for="stShowPrices" style="margin:0;text-transform:none;font-weight:500;">Show prices on the public website</label>
+          </div>
+          <p class="field-hint">Turn this off if you'd rather clients call or message to ask about pricing — services will show "Call for pricing" instead of a number.</p>
+
+          <div class="panel-head" style="margin-top:1.5rem;"><h2>Theme</h2></div>
+          <div class="form-group">
+            <label for="stAccentColor">Light theme pop color</label>
+            <select id="stAccentColor">
+              <option value="violet" ${(p.accentColor || 'violet') === 'violet' ? 'selected' : ''}>Violet</option>
+              <option value="orange" ${p.accentColor === 'orange' ? 'selected' : ''}>Orange</option>
+            </select>
+          </div>
+          <p class="field-hint">Applies to the light theme only, on both the dashboard and the public site — dark theme always stays violet.</p>
+
+          <div class="panel-head" style="margin-top:1.5rem;"><h2>Site Images</h2></div>
+          <p class="field-hint" style="margin-top:-0.4rem;margin-bottom:1rem;">These power the homepage hero and about section — upload a file or paste a URL for each.</p>
+          ${imageFieldHTML('stPortrait', p.profileImage, 'About / portrait photo')}
+          <div class="form-row" style="grid-template-columns:1fr 1fr;">
+            ${[0, 1, 2, 3, 4].map((i) => imageFieldHTML(`stHero${i}`, heroImages[i], `Hero image ${i + 1}`)).join('')}
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="settingsSubmit">Save Settings</button>
         </form>
       `;
 
+      ['stPortrait', 'stHero0', 'stHero1', 'stHero2', 'stHero3', 'stHero4'].forEach(wireImageField);
+
       document.getElementById('settingsFormEl').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitBtn = document.getElementById('settingsSubmit');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving…';
         try {
+          const profileImage = await resolveImageField('stPortrait', p.profileImage);
+          const newHeroImages = [];
+          for (let i = 0; i < 5; i++) {
+            const url = await resolveImageField(`stHero${i}`, heroImages[i]);
+            if (url) newHeroImages.push(url);
+          }
+
           await api('/profile', {
             method: 'PUT',
             body: JSON.stringify({
@@ -913,11 +1091,19 @@
               mapsUrl: document.getElementById('stMaps').value,
               instagramUrl: document.getElementById('stInstagram').value,
               facebookUrl: document.getElementById('stFacebook').value,
+              showPrices: document.getElementById('stShowPrices').checked,
+              accentColor: document.getElementById('stAccentColor').value,
+              profileImage,
+              heroImages: newHeroImages,
             }),
           });
           toast('Settings saved.');
+          document.documentElement.dataset.accent = document.getElementById('stAccentColor').value;
+          loadSettings();
         } catch (err) {
           toast(err.message, true);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save Settings';
         }
       });
     } catch (err) {

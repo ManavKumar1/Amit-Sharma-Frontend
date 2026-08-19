@@ -2,6 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+  // Runs before first paint so there's no flash of the wrong theme.
+  (function () {
+    try {
+      var theme = localStorage.getItem('theme');
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    } catch (err) { /* private mode etc — falls back to the default dark theme */ }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Amit Sharma — Makeup Artist &amp; Hairstylist in San Francisco</title>
 <meta name="description" content="Amit Sharma is an independent makeup artist and hairstylist in San Francisco specializing in editorial, bridal, and red-carpet beauty. Book a private appointment.">
@@ -90,6 +99,10 @@
         <a href="#about">About</a>
         <a href="#contact">Contact</a>
         <a href="book.html" class="btn btn-primary btn-sm">Book Appointment</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme">
+          <svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.6M12 18.9v2.6M4.2 4.2l1.9 1.9M17.9 17.9l1.9 1.9M2.5 12h2.6M18.9 12h2.6M4.2 19.8l1.9-1.9M17.9 6.1l1.9-1.9"/></svg>
+          <svg class="theme-toggle-icon theme-toggle-icon--moon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 14.3A8.4 8.4 0 1 1 9.7 4a7 7 0 0 0 10.3 10.3Z"/></svg>
+        </button>
       </div>
     </nav>
   </div>
@@ -118,8 +131,6 @@
         <a href="#work" class="btn btn-outline-light">View My Work</a>
       </div>
     </div>
-
-    <div class="scroll-cue" aria-hidden="true"><span class="line"></span> Scroll</div>
   </section>
 
 <!-- ============ CROSS MARQUEE ============ -->
@@ -213,7 +224,7 @@
         <span class="eyebrow">About Amit</span>
       </div>
       <div class="about-text-grid">
-        <p class="about-col" data-col="1">Amit is an independent makeup artist and hairstylist based in San Francisco, trained at the Cinema Makeup School in Los Angeles, with ten years across bridal and editorial teams throughout the Bay Area.</p>
+        <p class="about-col" data-col="1">Amit is an independent makeup artist and hairstylist based in San Francisco. He began his career assisting bridal makeup artists in Mumbai before training at the Cinema Makeup School in Los Angeles, and now brings ten years across Indian bridal and Western editorial teams throughout the Bay Area.</p>
         <p class="about-col" data-col="2">Every look starts with what's already there — great makeup isn't about hiding, it's about revealing what's already extraordinary.</p>
       </div>
 
@@ -236,10 +247,10 @@
 
     <div class="stat-band">
       <div class="container stat-band-inner">
-        <div class="stat-band-item"><span class="num">10+</span><span class="label">Years Experience</span></div>
-        <div class="stat-band-item"><span class="num">300+</span><span class="label">Looks Created</span></div>
-        <div class="stat-band-item"><span class="num">4.9</span><span class="label">Average Rating</span></div>
-        <div class="stat-band-item"><span class="num">25+</span><span class="label">Editorial Shoots</span></div>
+        <div class="stat-band-item"><span class="num" data-count-to="10" data-suffix="+">0</span><span class="label">Years Experience</span></div>
+        <div class="stat-band-item"><span class="num" data-count-to="300" data-suffix="+">0</span><span class="label">Looks Created</span></div>
+        <div class="stat-band-item"><span class="num" data-count-to="4.9" data-decimals="1">0</span><span class="label">Average Rating</span></div>
+        <div class="stat-band-item"><span class="num" data-count-to="25" data-suffix="+">0</span><span class="label">Editorial Shoots</span></div>
       </div>
     </div>
   </section>
@@ -391,7 +402,7 @@
           <a href="admin/login.html">Owner Login</a>
         </nav>
       </div>
-      <div>
+      <div class="footer-col">
         <div class="footer-col-title">Follow</div>
         <div class="footer-social" aria-label="Social links">
           <a href="#" aria-label="Instagram" target="_blank" rel="noopener">IG</a>

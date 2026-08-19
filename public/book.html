@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+  (function () {
+    try {
+      var theme = localStorage.getItem('theme');
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    } catch (err) { /* private mode etc — falls back to the default dark theme */ }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Book an Appointment — Amit Sharma</title>
 <meta name="description" content="Request an appointment with Amit Sharma, makeup artist and hairstylist in San Francisco.">
@@ -30,7 +38,13 @@
 <header class="simple-header">
   <div class="container nav-inner">
     <a href="index.html" class="brand">Amit Sharma</a>
-    <a href="index.html" class="back-link">&#8592; Back to site</a>
+    <div style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="index.html" class="back-link">&#8592; Back to site</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme">
+        <svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.6M12 18.9v2.6M4.2 4.2l1.9 1.9M17.9 17.9l1.9 1.9M2.5 12h2.6M18.9 12h2.6M4.2 19.8l1.9-1.9M17.9 6.1l1.9-1.9"/></svg>
+        <svg class="theme-toggle-icon theme-toggle-icon--moon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 14.3A8.4 8.4 0 1 1 9.7 4a7 7 0 0 0 10.3 10.3Z"/></svg>
+      </button>
+    </div>
   </div>
 </header>
 

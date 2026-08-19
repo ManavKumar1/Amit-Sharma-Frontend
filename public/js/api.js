@@ -26,6 +26,13 @@ function withId(item) {
   return { ...item, id: item._id };
 }
 
+// Shared by main.js and booking.js so a service's price always renders with
+// the right symbol, regardless of which currency it was saved in.
+const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', EUR: '€', GBP: '£' };
+function currencySymbol(code) {
+  return CURRENCY_SYMBOLS[code] || (code ? code + ' ' : '₹');
+}
+
 const Api = {
   async getProfile() {
     const p = await request('/profile');
@@ -44,6 +51,9 @@ const Api = {
       instagramUrl: p.instagramUrl,
       facebookUrl: p.facebookUrl,
       profileImage: p.profileImage,
+      heroImages: p.heroImages || [],
+      showPrices: p.showPrices !== false,
+      accentColor: p.accentColor || 'violet',
       businessHours: (p.businessHours || []).map((h) => ({
         day: h.day, open: h.open, close: h.close, closed: h.closed,
       })),
@@ -91,4 +101,20 @@ const Api = {
     };
     return request('/inquiries', { method: 'POST', body: JSON.stringify(body) });
   },
+
+  async subscribeNewsletter(email) {
+    return request('/newsletter', { method: 'POST', body: JSON.stringify({ email }) });
+  },
 };
+
+// Shared theme toggle — wired here (rather than main.js) so book.html,
+// which doesn't load main.js, still gets working light/dark switching.
+(function initThemeToggle() {
+  const toggle = document.getElementById('themeToggle');
+  if (!toggle) return;
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch (err) { /* private mode etc — non-fatal */ }
+  });
+})();

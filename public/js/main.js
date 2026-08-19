@@ -3,6 +3,12 @@
 
   document.getElementById('year').textContent = new Date().getFullYear();
 
+  /* ---------------- SOCIAL ICONS (real SVGs, currentColor so they follow existing hover styles) ---------------- */
+  const SOCIAL_ICONS = {
+    instagram: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M14.5 8.5H17V5.2c-.43-.06-1.9-.2-3.62-.2-3.58 0-6.03 2.24-6.03 6.35v2.9H3.9v3.7h3.45V21h3.8v-3.05h3.32l.53-3.7h-3.85v-2.55c0-1.07.29-1.8 1.85-1.8Z"/></svg>',
+  };
+
   /* ---------------- NAV ---------------- */
   const header = document.getElementById('siteHeader');
   const navToggle = document.getElementById('navToggle');
@@ -26,6 +32,12 @@
     });
   });
 
+  /* ---------------- SERVICES ---------------- */
+  function renderServicePrice(s, showPrices) {
+    if (!showPrices) return '<div class="service-price service-price--hidden">Call for pricing</div>';
+    return `<div class="service-price">${currencySymbol(s.currency)}${s.price}</div>`;
+  }
+
   /* ---------------- REVEAL ON SCROLL ---------------- */
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -48,13 +60,45 @@
   }
 
   Api.getProfile().then((profile) => {
+    // Owner's chosen pop color for light theme (dark theme always stays violet).
+    document.documentElement.dataset.accent = profile.accentColor || 'violet';
+
     // Floating WhatsApp button
     const waFloat = document.getElementById('whatsappFloat');
     waFloat.href = waLink(profile.whatsapp, `Hi ${profile.name}, I'd love to know more about your services.`);
 
-    // Footer social links
-    document.querySelectorAll('.footer-social a')[0].href = profile.instagramUrl;
-    document.querySelectorAll('.footer-social a')[1].href = profile.facebookUrl;
+    // Hero collage + about portrait — pull from the backend instead of the
+    // hardcoded placeholders baked into the HTML, falling back to whatever
+    // is already in the markup if the owner hasn't set custom images yet.
+    if (profile.heroImages && profile.heroImages.length) {
+      document.querySelectorAll('.hero-photo').forEach((img, i) => {
+        if (profile.heroImages[i]) img.src = profile.heroImages[i];
+      });
+    }
+    if (profile.profileImage) {
+      const portrait = document.querySelector('.about-media img');
+      if (portrait) portrait.src = profile.profileImage;
+    }
+    const ogImage = profile.heroImages && profile.heroImages[0];
+    if (ogImage) {
+      const ogTag = document.querySelector('meta[property="og:image"]');
+      if (ogTag) ogTag.setAttribute('content', ogImage);
+    }
+
+    // Footer social links — real SVG icons, hidden entirely when a link
+    // hasn't been set in the dashboard.
+    const footerSocial = document.querySelector('.footer-social');
+    if (footerSocial) {
+      const links = [
+        { url: profile.instagramUrl, label: 'Instagram', svg: SOCIAL_ICONS.instagram },
+        { url: profile.facebookUrl, label: 'Facebook', svg: SOCIAL_ICONS.facebook },
+      ].filter((s) => s.url && s.url.trim());
+      footerSocial.innerHTML = links.map((s) => `
+        <a href="${s.url}" aria-label="${s.label}" target="_blank" rel="noopener">${s.svg}</a>
+      `).join('');
+      const followCol = footerSocial.closest('.footer-col');
+      if (followCol) followCol.hidden = links.length === 0;
+    }
 
     // Contact list
     const contactList = document.getElementById('contactList');
@@ -75,27 +119,28 @@
         <td>${h.closed ? 'Closed' : `${h.open} – ${h.close}`}</td>
       </tr>
     `).join('');
-  });
 
-  /* ---------------- SERVICES ---------------- */
-  Api.getServices().then((services) => {
-    const list = document.getElementById('servicesList');
-    if (!services.length) {
-      list.innerHTML = '<p class="list-empty">Services are being updated — please check back shortly.</p>';
-      return;
-    }
-    list.innerHTML = services.map((s) => `
-      <div class="service-row reveal">
-        <div class="service-name">${s.name}</div>
-        <div class="service-desc">${s.description}</div>
-        <div class="service-meta">
-          <div class="service-price">$${s.price}</div>
-          <span class="service-duration">${s.duration} min</span>
+    // Services list needs to know whether to show prices, so it's chained
+    // after the profile resolves rather than fired independently.
+    return Api.getServices().then((services) => {
+      const list = document.getElementById('servicesList');
+      if (!services.length) {
+        list.innerHTML = '<p class="list-empty">Services are being updated — please check back shortly.</p>';
+        return;
+      }
+      list.innerHTML = services.map((s) => `
+        <div class="service-row reveal">
+          <div class="service-name">${s.name}</div>
+          <div class="service-desc">${s.description}</div>
+          <div class="service-meta">
+            ${renderServicePrice(s, profile.showPrices)}
+            <span class="service-duration">${s.duration} min</span>
+          </div>
+          <a href="book.html?service=${encodeURIComponent(s.id)}" class="btn btn-outline-dark">Book</a>
         </div>
-        <a href="book.html?service=${encodeURIComponent(s.id)}" class="btn btn-outline-dark">Book</a>
-      </div>
-    `).join('');
-    list.querySelectorAll('.reveal').forEach(observeReveal);
+      `).join('');
+      list.querySelectorAll('.reveal').forEach(observeReveal);
+    });
   });
 
   /* ---------------- PORTFOLIO + LIGHTBOX ---------------- */
@@ -218,5 +263,66 @@
   });
   document.getElementById('testimonialNext').addEventListener('click', () => {
     track.scrollBy({ left: 420, behavior: 'smooth' });
+  });
+
+  /* ---------------- ANIMATED STAT COUNTERS ---------------- */
+  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function animateCount(el) {
+    const target = parseFloat(el.dataset.countTo);
+    const decimals = Number(el.dataset.decimals || 0);
+    const suffix = el.dataset.suffix || '';
+    if (Number.isNaN(target)) return;
+
+    if (reduceMotionQuery.matches) {
+      el.textContent = target.toFixed(decimals) + suffix;
+      return;
+    }
+
+    const duration = 1400;
+    const start = performance.now();
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      el.textContent = (target * eased).toFixed(decimals) + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        animateCount(entry.target);
+        countObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('.stat-band-item .num[data-count-to]').forEach((el) => countObserver.observe(el));
+
+  /* ---------------- NEWSLETTER SIGNUP ---------------- */
+  const newsletterForm = document.getElementById('newsletterForm');
+  const newsletterNote = document.getElementById('newsletterNote');
+  const newsletterDefaultNote = newsletterNote.textContent;
+  newsletterForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById('newsletterEmail');
+    const submitBtn = newsletterForm.querySelector('button');
+    submitBtn.disabled = true;
+    newsletterNote.classList.remove('is-success');
+    try {
+      const result = await Api.subscribeNewsletter(emailInput.value.trim());
+      newsletterNote.textContent = result.alreadySubscribed
+        ? "You're already on the list — thank you!"
+        : 'Thanks for subscribing!';
+      newsletterNote.classList.add('is-success');
+      emailInput.value = '';
+    } catch (err) {
+      newsletterNote.textContent = err.message || 'Something went wrong — please try again.';
+    } finally {
+      submitBtn.disabled = false;
+      setTimeout(() => {
+        newsletterNote.textContent = newsletterDefaultNote;
+        newsletterNote.classList.remove('is-success');
+      }, 6000);
+    }
   });
 })();

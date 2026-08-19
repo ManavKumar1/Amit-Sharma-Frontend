@@ -150,6 +150,11 @@
   if (hasGSAP && hasSplitText && hasScrollTrigger && !reduceMotion) {
     document.querySelectorAll('.section-heading').forEach((el) => {
       const split = new SplitText(el, { type: 'words', wordsClass: 'gs-word' });
+      // SplitText's word spans are inline-block, which breaks the
+      // background-clip:text gradient on any ancestor <em> (see the
+      // .gs-word-accent comment in style.css) — reapply it directly on
+      // the words that came from inside an <em> so they stay visible.
+      el.querySelectorAll('em .gs-word').forEach((word) => word.classList.add('gs-word-accent'));
       gsap.set(split.words, { yPercent: 100, opacity: 0 });
       gsap.to(split.words, {
         yPercent: 0, opacity: 1,

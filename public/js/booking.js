@@ -7,6 +7,7 @@
     selectedService: null,
     selectedDate: '',
     selectedTime: '',
+    profile: null,
   };
 
   const panels = document.querySelectorAll('.booking-panel');
@@ -22,6 +23,11 @@
     document.querySelector('.booking-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  function servicePriceLabel(s) {
+    if (state.profile && state.profile.showPrices === false) return 'Call for pricing';
+    return `${currencySymbol(s.currency)}${s.price}`;
+  }
+
   /* ---------------- STEP 1: SERVICE ---------------- */
   const servicePickGrid = document.getElementById('servicePickGrid');
   const toStep2 = document.getElementById('toStep2');
@@ -29,7 +35,8 @@
   const params = new URLSearchParams(window.location.search);
   const preselectId = params.get('service');
 
-  Api.getServices().then((services) => {
+  Promise.all([Api.getProfile(), Api.getServices()]).then(([profile, services]) => {
+    state.profile = profile;
     state.services = services;
     if (!services.length) {
       servicePickGrid.innerHTML = '<p class="list-empty">No services available right now — please check back soon.</p>';
@@ -38,7 +45,7 @@
     servicePickGrid.innerHTML = services.map((s) => `
       <button type="button" class="service-pick" data-id="${s.id}">
         <div class="name">${s.name}</div>
-        <div class="meta">$${s.price} · ${s.duration} min</div>
+        <div class="meta">${servicePriceLabel(s)} · ${s.duration} min</div>
       </button>
     `).join('');
 
@@ -140,11 +147,14 @@
 
   /* ---------------- STEP 3: CUSTOMER INFO ---------------- */
   function renderSummary() {
+    const priceRow = state.profile && state.profile.showPrices === false
+      ? ''
+      : `<div class="booking-summary-row"><span class="k">Price</span><span>${currencySymbol(state.selectedService.currency)}${state.selectedService.price}</span></div>`;
     document.getElementById('bookingSummary').innerHTML = `
       <div class="booking-summary-row"><span class="k">Service</span><span>${state.selectedService.name}</span></div>
       <div class="booking-summary-row"><span class="k">Date</span><span>${new Date(state.selectedDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</span></div>
       <div class="booking-summary-row"><span class="k">Time</span><span>${state.selectedTime}</span></div>
-      <div class="booking-summary-row"><span class="k">Price</span><span>$${state.selectedService.price}</span></div>
+      ${priceRow}
     `;
   }
 
@@ -183,7 +193,7 @@
       });
       goToStep(4);
     } catch (err) {
-      alert('Something went wrong submitting your request. Please try again or reach out on WhatsApp.');
+      alert(err.message || 'Something went wrong submitting your request. Please try again or reach out on WhatsApp.');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit Request';
     }

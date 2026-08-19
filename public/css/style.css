@@ -10,8 +10,9 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;700;900&family=Dancing+Script:wght@500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Inter:wght@400;500;600;700;800&display=swap');
 
-:root {
-  /* ---- Color tokens ---- */
+:root,
+:root[data-theme="dark"] {
+  /* ---- Color tokens (DARK THEME — default, unchanged from the original design) ---- */
   --black: #000000;
   --black-rgb: 0, 0, 0;
   --black-soft: #0a0a0b;
@@ -26,22 +27,85 @@
   --white-08: rgba(255, 255, 255, 0.08);
   --white-06: rgba(255, 255, 255, 0.06);
 
-  --violet-1: #d3d0ff;   /* light lavender edge of accent gradient */
-  --violet-2: #4d3dff;   /* deep blue-violet edge of accent gradient */
-  --accent-gradient: linear-gradient(100deg, var(--violet-1) 0%, #8f86ff 45%, var(--violet-2) 100%);
+  --violet-1: #d3d0ff;
+  --violet-mid: #8f86ff;
+  --violet-2: #4d3dff;
   --accent-glow: rgba(77, 61, 255, 0.45);
+  --accent-wash: rgba(77, 61, 255, 0.12);
+  --rosewood: #e2726a;
+}
 
-  /* legacy alias kept so any un-migrated rule (incl. admin.css) still resolves sanely */
-  --ink: var(--black);
-  --ink-rgb: var(--black-rgb);
-  --ink-soft: var(--black-soft);
+:root[data-theme="light"] {
+  /* ---- Color tokens (LIGHT THEME) ----
+     Same roles as above, flipped: --black becomes the page/surface color
+     and --white becomes the primary text color. Every component in this
+     file was built on that "black = surface, white = text" convention,
+     so flipping just these two tokens (plus their opacity steps) re-themes
+     the entire site without touching individual component rules. */
+  --black: #faf6ef;
+  --black-rgb: 250, 246, 239;
+  --black-soft: #f1ebdf;
+  --white: #1a1512;
+  --white-rgb: 26, 21, 18;
+  --white-88: rgba(26, 21, 18, 0.88);
+  --white-70: rgba(26, 21, 18, 0.7);
+  --white-50: rgba(26, 21, 18, 0.5);
+  --white-35: rgba(26, 21, 18, 0.35);
+  --white-18: rgba(26, 21, 18, 0.18);
+  --white-14: rgba(26, 21, 18, 0.14);
+  --white-08: rgba(26, 21, 18, 0.08);
+  --white-06: rgba(26, 21, 18, 0.06);
+
+  --violet-1: #d3d0ff;
+  --violet-mid: #8f86ff;
+  --violet-2: #4d3dff;
+  --accent-glow: rgba(77, 61, 255, 0.35);
+  --accent-wash: rgba(77, 61, 255, 0.1);
+  --rosewood: #a8433a;
+}
+
+/* Owner's chosen pop color — offered for light theme only. Dark theme
+   always stays violet, same as before. */
+:root[data-theme="light"][data-accent="orange"] {
+  --violet-1: #ffd9ae;
+  --violet-mid: #f0973f;
+  --violet-2: #c85a1a;
+  --accent-glow: rgba(200, 90, 26, 0.35);
+  --accent-wash: rgba(200, 90, 26, 0.1);
+}
+
+:root[data-theme="light"] {
+  --accent-solid: var(--violet-2);
+  /* Reversed vs. dark theme: the deep edge leads so it reads clearly
+     against a light page; the light edge (low-contrast on a light bg)
+     recedes into the tail instead of leading. */
+  --accent-gradient: linear-gradient(100deg, var(--violet-2) 0%, var(--violet-mid) 55%, var(--violet-1) 100%);
+}
+
+:root {
+  --accent-gradient: linear-gradient(100deg, var(--violet-1) 0%, var(--violet-mid) 45%, var(--violet-2) 100%);
+  /* For FLAT accent text/icons/borders (not the gradient clip) — needs to
+     stay legible against the page surface, so it uses whichever edge of
+     the gradient reads best on --black in the active theme: the light
+     edge on a dark page, the deep edge on a light page. */
+  --accent-solid: var(--violet-1);
+
+  /* legacy alias kept so any un-migrated rule (incl. admin.css) still resolves sanely.
+     --ink is a fixed dark "chrome" color (sidebar/header) in both themes — it
+     doesn't flip. --porcelain is the flippable content-surface color (same
+     value as --black). --ink-contrast is for text/icons that sit on the
+     always-dark --ink chrome, so it stays light regardless of site theme. */
+  --ink: #14100d;
+  --ink-rgb: 20, 16, 13;
+  --ink-soft: #0d0a08;
+  --ink-contrast: #f3ece2;
+  --ink-contrast-70: rgba(243, 236, 226, 0.7);
   --porcelain: var(--black);
   --porcelain-dim: var(--black-soft);
   --espresso-text: var(--white);
-  --brass: var(--white);
-  --brass-light: var(--white);
-  --rosewood: var(--violet-2);
-  --line-on-ink: var(--white-14);
+  --brass: var(--violet-2);
+  --brass-light: var(--violet-1);
+  --line-on-ink: rgba(243, 236, 226, 0.14);
   --line-on-porcelain: var(--white-14);
   --ink-70: var(--white-70);
   --porcelain-85: var(--white-88);
@@ -63,7 +127,13 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; background: var(--black); }
+html {
+  scroll-behavior: smooth;
+  background: var(--black);
+  color-scheme: dark;
+  transition: background-color 0.4s var(--ease);
+}
+:root[data-theme="light"] { color-scheme: light; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
@@ -76,6 +146,7 @@ body {
   background: var(--black);
   -webkit-font-smoothing: antialiased;
   line-height: 1.55;
+  transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
 }
 
 img { max-width: 100%; display: block; }
@@ -96,7 +167,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--violet-1);
+  outline: 2px solid var(--accent-solid);
   outline-offset: 3px;
 }
 
@@ -126,6 +197,27 @@ h1, h2, h3, h4 {
 @keyframes accent-shimmer {
   0%, 100% { background-position: 0% center; }
   50% { background-position: 100% center; }
+}
+
+/* motion.js runs GSAP SplitText on every .section-heading to animate it in
+   word-by-word. SplitText wraps each word in its own inline-block span,
+   and an inline-block child breaks the background-clip:text gradient on
+   an ancestor <em> — the ancestor has no directly-owned text left to clip
+   to, so the gradient (and the word) render fully transparent. motion.js
+   tags the words that land inside an <em> with this class so the same
+   gradient-clip treatment is reapplied directly on the word span itself,
+   restoring the accent color instead of leaving it invisible. */
+.gs-word-accent {
+  font-family: var(--font-script);
+  font-style: normal;
+  font-weight: 700;
+  background: var(--accent-gradient);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: accent-shimmer 7s ease-in-out infinite;
 }
 
 .dot { opacity: 0.45; font-size: 0.8em; }
@@ -227,7 +319,7 @@ h1, h2, h3, h4 {
   background: var(--white);
   color: var(--black)!important;
 }
-.btn-primary:hover { background: var(--violet-1); transform: translateY(-1px); box-shadow: 0 10px 26px var(--accent-glow); }
+.btn-primary:hover { background: var(--violet-1); color: var(--ink) !important; transform: translateY(-1px); box-shadow: 0 10px 26px var(--accent-glow); }
 .btn-sm { padding: 0.6em 1.35em; font-size: 0.7rem; }
 
 .btn-outline-light,
@@ -257,7 +349,7 @@ h1, h2, h3, h4 {
 .btn-outline-light:hover::after,
 .btn-outline-dark:hover::after { transform: scaleX(1); }
 .btn-outline-light:hover,
-.btn-outline-dark:hover { color: var(--violet-1); }
+.btn-outline-dark:hover { color: var(--accent-solid); }
 
 /* Scoped exception: multi-step booking flow keeps a real bordered
    button so "Back" reads as a clear, tappable form control. */
@@ -298,7 +390,7 @@ h1, h2, h3, h4 {
   transition: transform 0.35s var(--ease);
 }
 .text-link:hover::after { transform: scaleX(1); }
-.text-link:hover { color: var(--violet-1); }
+.text-link:hover { color: var(--accent-solid); }
 
 /* =========================================================
    FILM GRAIN — reference build is perfectly flat black,
@@ -510,7 +602,7 @@ h1, h2, h3, h4 {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 200;
-  padding: 1.3rem 0;
+  padding: 2rem 0;
   transition: background 0.4s var(--ease), padding 0.4s var(--ease), border-color .4s var(--ease);
   border-bottom: 1px solid transparent;
 }
@@ -524,14 +616,14 @@ h1, h2, h3, h4 {
 .site-header.is-scrolled {
   background: rgba(var(--black-rgb), 0.86);
   backdrop-filter: blur(14px);
-  padding: 0.9rem 0;
+  padding: 1.05rem 0;
 }
 .nav-inner {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 34px;
+  min-height: 46px;
 }
 
 /* Small always-on mark, mobile / fallback */
@@ -597,20 +689,20 @@ h1, h2, h3, h4 {
 .nav-group { display: flex; align-items: center; gap: 2.3rem; }
 .nav-links a {
   font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.03em;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   color: var(--white-70);
   position: relative;
   padding-bottom: 4px;
-  text-transform: lowercase;
+  text-transform: uppercase;
 }
 .nav-links a::after {
   content: '';
   position: absolute;
   left: 0; bottom: 0;
-  width: 0; height: 1px;
-  background: var(--white);
+  width: 0; height: 2px;
+  background: var(--accent-gradient);
   transition: width 0.3s var(--ease);
 }
 .nav-links a:hover::after { width: 100%; }
@@ -641,6 +733,23 @@ h1, h2, h3, h4 {
 .nav-toggle[aria-expanded="true"] span { background: transparent; }
 .nav-toggle[aria-expanded="true"] span::before { top: 0; transform: rotate(45deg); }
 .nav-toggle[aria-expanded="true"] span::after { top: 0; transform: rotate(-45deg); }
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--white-14);
+  background: transparent;
+  color: var(--white-70);
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.theme-toggle:hover { color: var(--white); border-color: var(--white-35); }
+.theme-toggle-icon--moon { display: none; }
+:root[data-theme="light"] .theme-toggle-icon--sun { display: none; }
+:root[data-theme="light"] .theme-toggle-icon--moon { display: block; }
 
 @media (max-width: 860px) {
   .brand-desktop { display: none; }
@@ -805,31 +914,6 @@ h1, h2, h3, h4 {
   opacity: 0;
   animation: hero-rise-plain 0.9s var(--ease) 1.3s forwards;
 }
-
-.scroll-cue {
-  position: absolute;
-  left: 50%;
-  bottom: clamp(1.5rem, 4vw, 2.5rem);
-  transform: translateX(-50%);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
-  color: var(--white-50);
-  font-size: 0.68rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  opacity: 0;
-  animation: hero-rise-plain 0.9s var(--ease) 1.6s forwards;
-}
-.scroll-cue .line {
-  width: 1px;
-  height: 34px;
-  background: linear-gradient(var(--white-50), transparent);
-  animation: scroll-cue-move 1.8s ease-in-out infinite;
-}
-@keyframes scroll-cue-move { 0%,100% { transform: scaleY(1); opacity: 1; } 50% { transform: scaleY(0.5); opacity: 0.4; } }
 
 /* =========================================================
    STRUCTURAL TYPOGRAPHY — bleeding wordmarks used as section
@@ -1145,7 +1229,9 @@ h1, h2, h3, h4 {
   position: fixed;
   inset: 0;
   z-index: 500;
-  background: rgba(var(--black-rgb), 0.97);
+  /* Always dark, independent of --black-rgb — a light-theme scrim would
+     wash out the photos it's meant to showcase. */
+  background: rgba(0, 0, 0, 0.97);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1156,19 +1242,19 @@ h1, h2, h3, h4 {
 .lightbox.is-open { opacity: 1; visibility: visible; }
 .lightbox-figure { max-width: min(90vw, 1000px); max-height: 82vh; text-align: center; }
 .lightbox-figure img { max-height: 82vh; margin: 0 auto; border-radius: var(--radius); filter: grayscale(0.2); }
-.lightbox-caption { color: var(--white-70); margin-top: 1rem; font-size: 0.85rem; }
+.lightbox-caption { color: rgba(255, 255, 255, 0.7); margin-top: 1rem; font-size: 0.85rem; }
 .lightbox-close, .lightbox-prev, .lightbox-next {
   position: absolute;
   background: none;
-  border: 1px solid var(--white-18);
-  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
   border-radius: 50%;
   width: 46px; height: 46px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.1rem;
   transition: all 0.3s var(--ease);
 }
-.lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover { border-color: var(--white); color: var(--violet-1); }
+.lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover { border-color: #ffffff; color: var(--violet-1); }
 .lightbox-close { top: 1.5rem; right: 1.5rem; }
 .lightbox-prev { left: 1.5rem; top: 50%; transform: translateY(-50%); }
 .lightbox-next { right: 1.5rem; top: 50%; transform: translateY(-50%); }
@@ -1222,6 +1308,14 @@ h1, h2, h3, h4 {
   color: var(--white-88);
   white-space: nowrap;
 }
+.service-price--hidden {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-solid);
+}
 .service-duration {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
@@ -1260,7 +1354,7 @@ h1, h2, h3, h4 {
   transition: border-color 0.35s var(--ease), transform 0.35s var(--ease);
 }
 .testimonial-card:hover { border-color: var(--white-18); transform: translateY(-3px); }
-.testimonial-rating { color: var(--violet-1); font-size: 0.95rem; letter-spacing: 0.15em; }
+.testimonial-rating { color: var(--accent-solid); font-size: 0.95rem; letter-spacing: 0.15em; }
 .testimonial-quote {
   font-family: var(--font-display);
   font-style: italic;
@@ -1352,14 +1446,14 @@ h1, h2, h3, h4 {
   font-size: 1.1rem;
   transition: background 0.3s var(--ease), transform 0.3s var(--ease);
 }
-.newsletter-form button:hover { background: var(--violet-1); transform: translateX(2px); }
+.newsletter-form button:hover { background: var(--violet-1); color: var(--ink); transform: translateX(2px); }
 .newsletter-note {
   margin-top: 1rem;
   font-size: 0.82rem;
   color: var(--white-50);
   min-height: 1.2em;
 }
-.newsletter-note.is-success { color: var(--violet-1); }
+.newsletter-note.is-success { color: var(--accent-solid); }
 
 /* =========================================================
    CONTACT
@@ -1389,7 +1483,7 @@ h1, h2, h3, h4 {
 }
 .contact-list li .v { color: var(--white-70); }
 .contact-list li .v a { color: var(--white); font-weight: 500; }
-.contact-list li .v a:hover { color: var(--violet-1); }
+.contact-list li .v a:hover { color: var(--accent-solid); }
 .hours-table { width: 100%; margin-top: 1.5rem; border-collapse: collapse; }
 .hours-table tr { border-top: 1px solid var(--white-14); }
 .hours-table tr:last-child { border-bottom: 1px solid var(--white-14); }
@@ -1398,6 +1492,7 @@ h1, h2, h3, h4 {
 .hours-table tr.is-today td { color: var(--white); font-weight: 600; }
 .contact-map { position: relative; border: 1px solid var(--white-14); overflow: hidden; min-height: 320px; }
 .contact-map iframe { width: 100%; height: 100%; min-height: 320px; border: 0; filter: grayscale(1) invert(0.92) contrast(0.9); }
+:root[data-theme="light"] .contact-map iframe { filter: grayscale(0.35); }
 @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; } }
 
 /* =========================================================
@@ -1459,7 +1554,7 @@ h1, h2, h3, h4 {
   width: 56px; height: 56px;
   border-radius: 50%;
   background: var(--violet-1); 
-  color: var(--black);
+  color: var(--ink);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   transition: transform 0.3s var(--ease), background 0.3s var(--ease);
@@ -1499,7 +1594,7 @@ h1, h2, h3, h4 {
   align-items: center;
   gap: 0.5rem;
 }
-.simple-header .back-link:hover { color: var(--violet-1); }
+.simple-header .back-link:hover { color: var(--accent-solid); }
 
 .booking-shell { min-height: 100svh; padding: clamp(4rem, 8vw, 6rem) 0 5rem; background: var(--black); }
 .booking-header { text-align: center; max-width: 46ch; margin: 0 auto 3rem; }
@@ -1522,7 +1617,7 @@ h1, h2, h3, h4 {
   padding-bottom: 0.9rem;
   border-bottom: 2px solid var(--white-14);
 }
-.booking-step.is-active { color: var(--white); border-color: var(--violet-1); font-weight: 600; }
+.booking-step.is-active { color: var(--white); border-color: var(--accent-solid); font-weight: 600; }
 .booking-step.is-done { color: var(--white-70); border-color: var(--white-70); }
 
 .booking-card {
@@ -1566,7 +1661,7 @@ h1, h2, h3, h4 {
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .form-error {
   font-size: 0.78rem;
-  color: var(--violet-1);
+  color: var(--accent-solid);
   margin-top: 0.4rem;
   display: none;
 }
@@ -1585,7 +1680,7 @@ h1, h2, h3, h4 {
   transition: all 0.25s var(--ease);
 }
 .service-pick:hover { border-color: var(--white-50); }
-.service-pick.is-selected { border-color: var(--violet-1); background: rgba(77, 61, 255, 0.12); }
+.service-pick.is-selected { border-color: var(--accent-solid); background: var(--accent-wash); }
 .service-pick .name { font-family: var(--font-poster); font-weight: 500; font-size: 1rem; color: var(--white); }
 .service-pick .meta { font-size: 0.76rem; color: var(--white-50); margin-top: 0.3rem; }
 
@@ -1614,8 +1709,8 @@ h1, h2, h3, h4 {
 .confirmation-icon {
   width: 64px; height: 64px;
   border-radius: 50%;
-  border: 1px solid var(--violet-1);
-  color: var(--violet-1);
+  border: 1px solid var(--accent-solid);
+  color: var(--accent-solid);
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 1.5rem;
   font-size: 1.6rem;
