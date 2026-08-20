@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>
+  // Runs before first paint so there's no flash of the wrong theme.
+  (function () {
+    try {
+      var theme = localStorage.getItem('theme');
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    } catch (err) { /* private mode etc — falls back to the default dark theme */ }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full Portfolio — Amit Sharma</title>
+<meta name="description" content="The complete makeup and hair portfolio of Amit Sharma — bridal, editorial, red carpet, haircuts, and more.">
+<link rel="canonical" href="https://example.com/portfolio.html">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💄</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="grain-overlay" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main" style="position:absolute;left:-999px;top:0;background:#0b0b0c;color:#f3ece2;padding:1em;z-index:999;">Skip to content</a>
+
+<!-- ============ NAVIGATION (same as index.html, links point back to the homepage sections) ============ -->
+<header class="site-header" id="siteHeader">
+  <div class="container nav-inner">
+    <a href="index.html#top" class="brand-mobile">Amit Sharma</a>
+
+    <a href="index.html#top" class="brand-desktop" aria-label="Amit Sharma — home">
+      <span class="brand-mark"><span class="script">A</span>S</span>
+      <span class="brand-name">Amit Sharma</span>
+      <span class="brand-caption">Makeup <span class="dot">✦</span> Hair</span>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu">
+      <span></span>
+    </button>
+
+    <nav id="navLinks" class="nav-links" aria-label="Primary">
+      <div class="nav-group nav-group-left">
+        <a href="index.html#work">Work</a>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#reviews">Reviews</a>
+      </div>
+      <div class="nav-group nav-group-right">
+        <a href="index.html#about">About</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="book.html" class="btn btn-primary btn-sm">Book Appointment</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme">
+          <svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.6M12 18.9v2.6M4.2 4.2l1.9 1.9M17.9 17.9l1.9 1.9M2.5 12h2.6M18.9 12h2.6M4.2 19.8l1.9-1.9M17.9 6.1l1.9-1.9"/></svg>
+          <svg class="theme-toggle-icon theme-toggle-icon--moon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 14.3A8.4 8.4 0 1 1 9.7 4a7 7 0 0 0 10.3 10.3Z"/></svg>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="section section--dark" style="padding-top:clamp(7.5rem, 14vw, 10rem);">
+    <div class="container">
+      <span class="eyebrow">Full Gallery</span>
+      <h1 class="section-heading">Complete <em>portfolio</em></h1>
+
+      <div class="filter-bar" id="filterBar" role="tablist" aria-label="Filter portfolio by category" style="margin-top:1.8rem;">
+        <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">All</button>
+        <button class="filter-btn" data-filter="makeup" role="tab" aria-selected="false">Makeup</button>
+        <button class="filter-btn" data-filter="hair" role="tab" aria-selected="false">Hair</button>
+        <button class="filter-btn" data-filter="haircut" role="tab" aria-selected="false">Haircut</button>
+        <button class="filter-btn" data-filter="bridal" role="tab" aria-selected="false">Bridal</button>
+        <button class="filter-btn" data-filter="editorial" role="tab" aria-selected="false">Editorial</button>
+      </div>
+
+      <div class="portfolio-wrap">
+        <div class="portfolio-bg-word" aria-hidden="true">Work</div>
+        <div class="portfolio-grid" id="portfolioGrid" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ LIGHTBOX ============ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Portfolio image viewer">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous image">&#8592;</button>
+  <figure class="lightbox-figure">
+    <img id="lightboxImg" src="" alt="">
+    <figcaption class="lightbox-caption" id="lightboxCaption"></figcaption>
+  </figure>
+  <button class="lightbox-next" id="lightboxNext" aria-label="Next image">&#8594;</button>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/portfolio-page.js"></script>
+</body>
+</html>

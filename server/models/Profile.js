@@ -19,7 +19,7 @@ const profileSchema = new mongoose.Schema(
     profileImage: { type: String, default: '' },
     heroImages: { type: [String], default: [] },
     showPrices: { type: Boolean, default: true },
-    accentColor: { type: String, enum: ['violet', 'orange'], default: 'violet' },
+    accentColor: { type: String, enum: ['violet', 'orange', 'rose', 'emerald', 'gold', 'azure'], default: 'violet' },
     phone: { type: String, default: '' },
     whatsapp: { type: String, default: '' },
     email: { type: String, default: '' },

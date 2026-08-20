@@ -59,6 +59,30 @@
     return `https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`;
   }
 
+  // Builds a real, embeddable Google Maps src from whatever the owner
+  // pasted into Settings — a proper embed URL is used as-is, a "place"
+  // or "?q=" link has its query extracted and re-embedded, and if nothing
+  // usable was set, it falls back to the studio address on file so the
+  // map is never just a stale hardcoded location.
+  function buildMapEmbedSrc(mapsUrl, address, city) {
+    const addressQuery = [address, city].filter(Boolean).join(', ');
+    if (mapsUrl) {
+      if (mapsUrl.includes('/maps/embed') || mapsUrl.includes('output=embed')) return mapsUrl;
+      try {
+        const url = new URL(mapsUrl);
+        const q = url.searchParams.get('q') || url.searchParams.get('query');
+        if (q) return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+        const placeMatch = mapsUrl.match(/\/maps\/place\/([^/@]+)/);
+        if (placeMatch) {
+          const place = decodeURIComponent(placeMatch[1]).replace(/\+/g, ' ');
+          return `https://maps.google.com/maps?q=${encodeURIComponent(place)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+        }
+      } catch (err) { /* not a parseable URL — fall through to the address fallback below */ }
+    }
+    if (addressQuery) return `https://maps.google.com/maps?q=${encodeURIComponent(addressQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+    return '';
+  }
+
   Api.getProfile().then((profile) => {
     // Owner's chosen pop color for light theme (dark theme always stays violet).
     document.documentElement.dataset.accent = profile.accentColor || 'violet';
@@ -67,22 +91,45 @@
     const waFloat = document.getElementById('whatsappFloat');
     waFloat.href = waLink(profile.whatsapp, `Hi ${profile.name}, I'd love to know more about your services.`);
 
-    // Hero collage + about portrait — pull from the backend instead of the
-    // hardcoded placeholders baked into the HTML, falling back to whatever
-    // is already in the markup if the owner hasn't set custom images yet.
-    if (profile.heroImages && profile.heroImages.length) {
-      document.querySelectorAll('.hero-photo').forEach((img, i) => {
-        if (profile.heroImages[i]) img.src = profile.heroImages[i];
-      });
+    // Hero collage — built entirely from Profile.heroImages instead of
+    // hardcoded placeholders. Fills the biggest/most central slots first
+    // so 1–4 images still look art-directed instead of leaving gaps, and
+    // the whole collage is skipped if the owner hasn't set any yet.
+    const heroCollage = document.getElementById('heroCollage');
+    const heroImages = (profile.heroImages || []).filter(Boolean);
+    if (heroCollage) {
+      if (!heroImages.length) {
+        heroCollage.remove();
+      } else {
+        const slotFillOrder = [3, 1, 4, 2, 5];
+        const slots = slotFillOrder.slice(0, Math.min(heroImages.length, slotFillOrder.length));
+        heroCollage.innerHTML = slots.map((slotNum, i) => `
+          <img class="hero-photo hp-${slotNum}" src="${heroImages[i]}" alt="" loading="eager">
+        `).join('');
+      }
     }
     if (profile.profileImage) {
       const portrait = document.querySelector('.about-media img');
       if (portrait) portrait.src = profile.profileImage;
     }
-    const ogImage = profile.heroImages && profile.heroImages[0];
+    const ogImage = heroImages[0];
     if (ogImage) {
       const ogTag = document.querySelector('meta[property="og:image"]');
       if (ogTag) ogTag.setAttribute('content', ogImage);
+    }
+
+    // Studio map — pulled from Profile.mapsUrl (or the address on file)
+    // instead of the static src baked into the page.
+    const mapIframe = document.getElementById('contactMapIframe');
+    const mapFrame = document.getElementById('contactMapFrame');
+    if (mapIframe && mapFrame) {
+      const embedSrc = buildMapEmbedSrc(profile.mapsUrl, profile.address, profile.city);
+      if (embedSrc) {
+        mapIframe.src = embedSrc;
+        mapFrame.hidden = false;
+      } else {
+        mapFrame.hidden = true;
+      }
     }
 
     // Footer social links — real SVG icons, hidden entirely when a link
@@ -146,16 +193,23 @@
   /* ---------------- PORTFOLIO + LIGHTBOX ---------------- */
   const grid = document.getElementById('portfolioGrid');
   const filterBar = document.getElementById('filterBar');
+  const HOME_PORTFOLIO_CAP = 6;
   let currentItems = [];
   let lightboxIndex = 0;
 
-  function renderPortfolio(items) {
-    currentItems = items;
+  function renderPortfolio(items, category) {
+    // Featured pieces (the owner's picks) lead the homepage teaser, so
+    // marking something "Featured" in the dashboard actually does
+    // something on the site instead of just toggling a hidden flag.
+    const ordered = items.slice().sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+    const capped = ordered.slice(0, HOME_PORTFOLIO_CAP);
+    currentItems = capped;
+
     if (!items.length) {
       grid.innerHTML = '<p class="portfolio-empty">No work in this category yet — check back soon.</p>';
       return;
     }
-    grid.innerHTML = items.map((item, i) => `
+    grid.innerHTML = capped.map((item, i) => `
       <button class="portfolio-item ${item.size ? 'size-' + item.size : ''} reveal" data-index="${i}" aria-label="View ${item.title} full screen">
         <img src="${item.imageUrl}" alt="${item.title} — ${item.category}" loading="lazy">
         <span class="portfolio-index">N°${String(i + 1).padStart(2, '0')}</span>
@@ -170,12 +224,22 @@
       btn.addEventListener('click', () => openLightbox(Number(btn.dataset.index)));
       observeReveal(btn);
     });
+
+    const existingMore = document.getElementById('portfolioMore');
+    if (existingMore) existingMore.remove();
+    if (items.length > HOME_PORTFOLIO_CAP) {
+      const more = document.createElement('div');
+      more.className = 'portfolio-more';
+      more.id = 'portfolioMore';
+      more.innerHTML = `<a class="btn btn-outline-dark" href="portfolio.html?filter=${encodeURIComponent(category || 'all')}">Show More (${items.length - HOME_PORTFOLIO_CAP} more)</a>`;
+      grid.insertAdjacentElement('afterend', more);
+    }
   }
 
   function loadPortfolio(category) {
     grid.setAttribute('aria-busy', 'true');
     Api.getPortfolio({ category }).then((items) => {
-      renderPortfolio(items);
+      renderPortfolio(items, category);
       grid.setAttribute('aria-busy', 'false');
     });
   }

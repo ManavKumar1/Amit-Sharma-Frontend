@@ -96,6 +96,17 @@
     return CURRENCY_SYMBOLS[code] || (code ? code + ' ' : '₹');
   }
 
+  // Swatch colors here are just for the picker preview — the actual site
+  // colors live in style.css's :root[data-accent="..."] blocks.
+  const ACCENT_OPTIONS = [
+    { value: 'violet', label: 'Violet', swatch: '#4d3dff' },
+    { value: 'orange', label: 'Orange', swatch: '#c85a1a' },
+    { value: 'rose', label: 'Rose', swatch: '#c22a72' },
+    { value: 'emerald', label: 'Emerald', swatch: '#0f7d4f' },
+    { value: 'gold', label: 'Gold', swatch: '#a8720a' },
+    { value: 'azure', label: 'Azure', swatch: '#14579c' },
+  ];
+
   /* ---------------- THEME TOGGLE ---------------- */
   document.getElementById('themeToggle').addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
@@ -1044,8 +1055,7 @@
           <div class="form-group">
             <label for="stAccentColor">Light theme pop color</label>
             <select id="stAccentColor">
-              <option value="violet" ${(p.accentColor || 'violet') === 'violet' ? 'selected' : ''}>Violet</option>
-              <option value="orange" ${p.accentColor === 'orange' ? 'selected' : ''}>Orange</option>
+              ${ACCENT_OPTIONS.map((opt) => `<option value="${opt.value}" ${(p.accentColor || 'violet') === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
             </select>
           </div>
           <p class="field-hint">Applies to the light theme only, on both the dashboard and the public site — dark theme always stays violet.</p>

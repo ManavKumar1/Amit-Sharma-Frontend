@@ -112,12 +112,8 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero">
-    <div class="hero-collage" aria-hidden="true">
-      <img class="hero-photo hp-1" src="https://picsum.photos/seed/amit-work-1/500/650" alt="" loading="eager">
-      <img class="hero-photo hp-2" src="https://picsum.photos/seed/amit-work-2/460/600" alt="" loading="eager">
-      <img class="hero-photo hp-3" src="https://picsum.photos/seed/amit-work-3/560/720" alt="" loading="eager">
-      <img class="hero-photo hp-4" src="https://picsum.photos/seed/amit-work-4/460/600" alt="" loading="eager">
-      <img class="hero-photo hp-5" src="https://picsum.photos/seed/amit-work-5/480/620" alt="" loading="eager">
+    <div class="hero-collage" id="heroCollage" aria-hidden="true">
+      <!-- populated by js/main.js from Profile.heroImages — empty/fewer images degrade gracefully -->
     </div>
 
     <div class="hero-content container">
@@ -229,11 +225,13 @@
       </div>
 
       <div class="about-media-row">
+        <div class="about-media-bg-word" aria-hidden="true">Studio</div>
         <div class="about-media reveal">
           <img src="https://picsum.photos/seed/amit-portrait/700/900" alt="Amit Sharma smiling in his studio, holding a makeup brush" loading="lazy">
         </div>
         <div class="about-side reveal">
-          <p class="about-note">His own time in front of the camera as a model taught him exactly what holds up under studio lights and camera flash — skin that still looks like skin, and a kit built entirely around what actually survives a twelve-hour shoot day.</p>
+          <span class="eyebrow">Behind The Kit</span>
+          <p class="about-note"><span class="about-quote-mark" aria-hidden="true">&#8220;</span>His own years modeling in front of the camera — shooting bridal editorials in Mumbai before moving to San Francisco — taught him exactly what holds up under studio lights and camera flash: skin that still looks like skin, and a kit built entirely around what actually survives a twelve-hour shoot day.</p>
           <div class="about-specialisms">
             <span class="tag-pill">Bridal</span>
             <span class="tag-pill">Editorial</span>
@@ -351,8 +349,8 @@
         <table class="hours-table" id="hoursTable">
           <!-- populated by js/main.js -->
         </table>
-        <div class="map-frame contact-map" style="margin-top:1.6rem;">
-          <iframe title="Studio location map" loading="lazy" src="https://maps.google.com/maps?q=548%20Sutter%20Street%20San%20Francisco&t=&z=14&ie=UTF8&iwloc=&output=embed"></iframe>
+        <div class="map-frame contact-map" id="contactMapFrame" style="margin-top:1.6rem;">
+          <iframe id="contactMapIframe" title="Studio location map" loading="lazy" src="https://maps.google.com/maps?q=548%20Sutter%20Street%20San%20Francisco&t=&z=14&ie=UTF8&iwloc=&output=embed"></iframe>
         </div>
       </div>
     </div>
@@ -362,8 +360,12 @@
   <section class="newsletter-band">
     <div class="container">
       <span class="eyebrow" style="justify-content:center;">Stay in the loop</span>
-      <h2 class="section-heading newsletter-heading"><span class="swash">S</span>ubscribe to the <br>
-        <span class="swash">N</span>ewsletter</h2>
+      <h2 class="section-heading newsletter-heading">
+        <span class="swash">S</span>
+        ubscribe to the 
+        <br>
+        <span class="swash">N</span>ewsletter
+      </h2>
       <form class="newsletter-form" id="newsletterForm">
         <input type="email" id="newsletterEmail" placeholder="Enter your email" required autocomplete="email">
         <button type="submit" aria-label="Subscribe">&#8594;</button>
