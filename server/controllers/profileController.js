@@ -28,7 +28,7 @@ async function updateProfile(req, res) {
     'name', 'title', 'tagline', 'bio', 'profileImage', 'heroImages',
     'phone', 'whatsapp', 'email', 'address', 'city',
     'mapsUrl', 'instagramUrl', 'facebookUrl', 'businessHours',
-    'showPrices', 'accentColor',
+    'showPrices', 'accentColor', 'lightSurface',
   ];
   editableFields.forEach((field) => {
     if (req.body[field] !== undefined) profile[field] = req.body[field];

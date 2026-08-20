@@ -20,6 +20,7 @@ const profileSchema = new mongoose.Schema(
     heroImages: { type: [String], default: [] },
     showPrices: { type: Boolean, default: true },
     accentColor: { type: String, enum: ['violet', 'orange', 'rose', 'emerald', 'gold', 'azure'], default: 'violet' },
+    lightSurface: { type: String, enum: ['warm', 'bright'], default: 'warm' },
     phone: { type: String, default: '' },
     whatsapp: { type: String, default: '' },
     email: { type: String, default: '' },
