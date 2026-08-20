@@ -86,9 +86,10 @@
   api('/profile').then((p) => {
     if (!p) return;
     if (p.name) artistName = p.name.split(' ')[0];
-    // Dashboard chrome uses the same owner-chosen pop color as the public
-    // site, applied only when the dashboard itself is in light theme.
+    // Dashboard chrome uses the same owner-chosen pop color and light
+    // surface as the public site, in both dark and light theme.
     document.documentElement.dataset.accent = p.accentColor || 'violet';
+    document.documentElement.dataset.surface = p.lightSurface || 'warm';
   }).catch(() => {});
 
   const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', EUR: '€', GBP: '£' };
@@ -1053,12 +1054,20 @@
 
           <div class="panel-head" style="margin-top:1.5rem;"><h2>Theme</h2></div>
           <div class="form-group">
-            <label for="stAccentColor">Light theme pop color</label>
+            <label for="stAccentColor">Pop color</label>
             <select id="stAccentColor">
               ${ACCENT_OPTIONS.map((opt) => `<option value="${opt.value}" ${(p.accentColor || 'violet') === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
             </select>
           </div>
-          <p class="field-hint">Applies to the light theme only, on both the dashboard and the public site — dark theme always stays violet.</p>
+          <p class="field-hint">Applies on both the dashboard and the public site, in both dark and light theme.</p>
+          <div class="form-group">
+            <label for="stLightSurface">Light theme background</label>
+            <select id="stLightSurface">
+              <option value="warm" ${(p.lightSurface || 'warm') === 'warm' ? 'selected' : ''}>Warm (off-white)</option>
+              <option value="bright" ${p.lightSurface === 'bright' ? 'selected' : ''}>Bright white</option>
+            </select>
+          </div>
+          <p class="field-hint">Only affects light theme — pick between the current warm off-white or a crisper true-white page.</p>
 
           <div class="panel-head" style="margin-top:1.5rem;"><h2>Site Images</h2></div>
           <p class="field-hint" style="margin-top:-0.4rem;margin-bottom:1rem;">These power the homepage hero and about section — upload a file or paste a URL for each.</p>
@@ -1103,12 +1112,14 @@
               facebookUrl: document.getElementById('stFacebook').value,
               showPrices: document.getElementById('stShowPrices').checked,
               accentColor: document.getElementById('stAccentColor').value,
+              lightSurface: document.getElementById('stLightSurface').value,
               profileImage,
               heroImages: newHeroImages,
             }),
           });
           toast('Settings saved.');
           document.documentElement.dataset.accent = document.getElementById('stAccentColor').value;
+          document.documentElement.dataset.surface = document.getElementById('stLightSurface').value;
           loadSettings();
         } catch (err) {
           toast(err.message, true);

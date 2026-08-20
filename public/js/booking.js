@@ -38,6 +38,8 @@
   Promise.all([Api.getProfile(), Api.getServices()]).then(([profile, services]) => {
     state.profile = profile;
     state.services = services;
+    document.documentElement.dataset.accent = profile.accentColor || 'violet';
+    document.documentElement.dataset.surface = profile.lightSurface || 'warm';
     if (!services.length) {
       servicePickGrid.innerHTML = '<p class="list-empty">No services available right now — please check back soon.</p>';
       return;

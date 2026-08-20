@@ -64,42 +64,53 @@
   --rosewood: #a8433a;
 }
 
-/* Owner's chosen pop color — offered for light theme only. Dark theme
-   always stays violet, same as before. */
-:root[data-theme="light"][data-accent="orange"] {
+/* Owner's choice of light-theme surface — the default is a warm
+   off-white; this swaps it for a crisper true-white page instead.
+   Only meaningful in light theme (dark theme's black stays black). */
+:root[data-theme="light"][data-surface="bright"] {
+  --black: #ffffff;
+  --black-rgb: 255, 255, 255;
+  --black-soft: #f5f5f5;
+}
+
+/* Owner's chosen pop color — applies consistently across both dark and
+   light theme. Each theme still auto-adjusts which edge of the palette
+   (light vs. deep) leads, so it stays legible against either background,
+   but the color family itself (e.g. emerald) no longer changes with theme. */
+:root[data-accent="orange"] {
   --violet-1: #ffd9ae;
   --violet-mid: #f0973f;
   --violet-2: #c85a1a;
-  --accent-glow: rgba(200, 90, 26, 0.35);
-  --accent-wash: rgba(200, 90, 26, 0.1);
+  --accent-glow: rgba(200, 90, 26, 0.4);
+  --accent-wash: rgba(200, 90, 26, 0.11);
 }
-:root[data-theme="light"][data-accent="rose"] {
+:root[data-accent="rose"] {
   --violet-1: #ffd2e6;
   --violet-mid: #f472ab;
   --violet-2: #c22a72;
-  --accent-glow: rgba(194, 42, 114, 0.35);
-  --accent-wash: rgba(194, 42, 114, 0.1);
+  --accent-glow: rgba(194, 42, 114, 0.4);
+  --accent-wash: rgba(194, 42, 114, 0.11);
 }
-:root[data-theme="light"][data-accent="emerald"] {
+:root[data-accent="emerald"] {
   --violet-1: #c3f2d9;
   --violet-mid: #3fbf82;
   --violet-2: #0f7d4f;
-  --accent-glow: rgba(15, 125, 79, 0.35);
-  --accent-wash: rgba(15, 125, 79, 0.1);
+  --accent-glow: rgba(15, 125, 79, 0.4);
+  --accent-wash: rgba(15, 125, 79, 0.11);
 }
-:root[data-theme="light"][data-accent="gold"] {
+:root[data-accent="gold"] {
   --violet-1: #ffe6a8;
   --violet-mid: #f2b23a;
   --violet-2: #a8720a;
-  --accent-glow: rgba(168, 114, 10, 0.35);
-  --accent-wash: rgba(168, 114, 10, 0.1);
+  --accent-glow: rgba(168, 114, 10, 0.4);
+  --accent-wash: rgba(168, 114, 10, 0.11);
 }
-:root[data-theme="light"][data-accent="azure"] {
+:root[data-accent="azure"] {
   --violet-1: #c2e2ff;
   --violet-mid: #4c9fee;
   --violet-2: #14579c;
-  --accent-glow: rgba(20, 87, 156, 0.35);
-  --accent-wash: rgba(20, 87, 156, 0.1);
+  --accent-glow: rgba(20, 87, 156, 0.4);
+  --accent-wash: rgba(20, 87, 156, 0.11);
 }
 
 :root[data-theme="light"] {
@@ -827,7 +838,7 @@ h1, h2, h3, h4 {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(ellipse 55% 45% at var(--mx) var(--my), rgba(77, 61, 255, 0.16), transparent 62%);
+  background: radial-gradient(ellipse 55% 45% at var(--mx) var(--my), var(--accent-wash), transparent 62%);
   pointer-events: none;
 }
 .hero-collage {

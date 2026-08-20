@@ -40,9 +40,10 @@
     revealObserver.observe(el);
   }
 
-  /* ---------------- ACCENT COLOR ---------------- */
+  /* ---------------- ACCENT COLOR + LIGHT SURFACE ---------------- */
   Api.getProfile().then((profile) => {
     document.documentElement.dataset.accent = profile.accentColor || 'violet';
+    document.documentElement.dataset.surface = profile.lightSurface || 'warm';
   }).catch(() => {});
 
   /* ---------------- PORTFOLIO GRID (uncapped) + LIGHTBOX ---------------- */

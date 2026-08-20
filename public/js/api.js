@@ -54,6 +54,7 @@ const Api = {
       heroImages: p.heroImages || [],
       showPrices: p.showPrices !== false,
       accentColor: p.accentColor || 'violet',
+      lightSurface: p.lightSurface || 'warm',
       businessHours: (p.businessHours || []).map((h) => ({
         day: h.day, open: h.open, close: h.close, closed: h.closed,
       })),

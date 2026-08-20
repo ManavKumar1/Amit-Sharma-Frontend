@@ -84,8 +84,10 @@
   }
 
   Api.getProfile().then((profile) => {
-    // Owner's chosen pop color for light theme (dark theme always stays violet).
+    // Owner's chosen pop color — now applies in both dark and light theme.
     document.documentElement.dataset.accent = profile.accentColor || 'violet';
+    // Owner's chosen light-theme background: warm off-white (default) or bright white.
+    document.documentElement.dataset.surface = profile.lightSurface || 'warm';
 
     // Floating WhatsApp button
     const waFloat = document.getElementById('whatsappFloat');
