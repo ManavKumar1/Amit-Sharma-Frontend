@@ -195,7 +195,7 @@
   /* ---------------- PORTFOLIO + LIGHTBOX ---------------- */
   const grid = document.getElementById('portfolioGrid');
   const filterBar = document.getElementById('filterBar');
-  const HOME_PORTFOLIO_CAP = 6;
+  const HOME_PORTFOLIO_CAP = 5;
   let currentItems = [];
   let lightboxIndex = 0;
 
