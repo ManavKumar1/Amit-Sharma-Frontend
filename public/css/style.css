@@ -1260,6 +1260,7 @@ h1, h2, h3, h4 {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-auto-rows: 8vw;
+  grid-auto-flow: row dense;
   gap: 1.1rem;
   perspective: 1000px;
 }
@@ -1292,19 +1293,24 @@ h1, h2, h3, h4 {
 }
 .portfolio-item:hover img { transform: scale(1.05); filter: grayscale(0.35) contrast(1.05); }
 
-/* organic collage sizing — repeats every 12 items, no data changes needed */
+/* organic collage sizing — repeats every 12 items, no data changes needed.
+   Row/column spans alone create the masonry size variety; deliberately no
+   margin-top nudges here — those pushed items outside their allocated grid
+   cell, which only looked fine with a long enough item sequence to absorb
+   the overflow and clipped into neighboring photos otherwise (e.g. on a
+   capped 6-item grid). */
 .portfolio-grid .portfolio-item:nth-child(12n+1) { grid-column: span 2; grid-row: span 5; }
-.portfolio-grid .portfolio-item:nth-child(12n+2) { grid-column: span 2; grid-row: span 4; margin-top: 8%; }
+.portfolio-grid .portfolio-item:nth-child(12n+2) { grid-column: span 2; grid-row: span 4; }
 .portfolio-grid .portfolio-item:nth-child(12n+3) { grid-column: span 2; grid-row: span 6; }
-.portfolio-grid .portfolio-item:nth-child(12n+4) { grid-column: span 3; grid-row: span 5; margin-top: 4%; }
+.portfolio-grid .portfolio-item:nth-child(12n+4) { grid-column: span 3; grid-row: span 5; }
 .portfolio-grid .portfolio-item:nth-child(12n+5) { grid-column: span 3; grid-row: span 5; }
 .portfolio-grid .portfolio-item:nth-child(12n+6) { grid-column: span 2; grid-row: span 4; }
-.portfolio-grid .portfolio-item:nth-child(12n+7) { grid-column: span 2; grid-row: span 4; margin-top: 6%; }
+.portfolio-grid .portfolio-item:nth-child(12n+7) { grid-column: span 2; grid-row: span 4; }
 .portfolio-grid .portfolio-item:nth-child(12n+8) { grid-column: span 2; grid-row: span 5; }
-.portfolio-grid .portfolio-item:nth-child(12n+9) { grid-column: span 3; grid-row: span 4; margin-top: 3%; }
+.portfolio-grid .portfolio-item:nth-child(12n+9) { grid-column: span 3; grid-row: span 4; }
 .portfolio-grid .portfolio-item:nth-child(12n+10) { grid-column: span 3; grid-row: span 5; }
 .portfolio-grid .portfolio-item:nth-child(12n+11) { grid-column: span 2; grid-row: span 4; }
-.portfolio-grid .portfolio-item:nth-child(12n+12) { grid-column: span 2; grid-row: span 5; margin-top: 5%; }
+.portfolio-grid .portfolio-item:nth-child(12n+12) { grid-column: span 2; grid-row: span 5; }
 /* size hints from data still win, if a category ever supplies them */
 .portfolio-item.size-tall { grid-row: span 7 !important; }
 .portfolio-item.size-wide { grid-column: span 4 !important; }

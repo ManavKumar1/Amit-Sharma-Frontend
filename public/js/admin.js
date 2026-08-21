@@ -1029,8 +1029,8 @@
 
           <div class="panel-head" style="margin-top:1.5rem;"><h2>Contact</h2></div>
           <div class="form-row">
-            <div class="form-group"><label for="stPhone">Phone</label><input type="text" id="stPhone" value="${p.phone || ''}" placeholder="+14155550148"></div>
-            <div class="form-group"><label for="stWhatsapp">WhatsApp (digits only)</label><input type="text" id="stWhatsapp" value="${p.whatsapp || ''}" placeholder="14155550148"></div>
+            <div class="form-group"><label for="stPhone">Phone</label><input type="text" id="stPhone" value="${p.phone || ''}" placeholder="+919876543210"></div>
+            <div class="form-group"><label for="stWhatsapp">WhatsApp (digits only)</label><input type="text" id="stWhatsapp" value="${p.whatsapp || ''}" placeholder="919876543210"></div>
           </div>
           <div class="form-group"><label for="stEmail">Email</label><input type="email" id="stEmail" value="${p.email || ''}"></div>
 
